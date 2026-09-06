@@ -3,7 +3,7 @@
 **Project:** Tenant
 **What it is:** A dated rules engine for Irish rent control, behind a site that tells a
 tenant whether their rent is lawful and whether the notice asking for it is valid.
-**Author:** Nathan Alvares · **Date:** 6 September 2026 · **Status:** research complete, no code yet
+**Author:** Nathan Alvares · **Date:** 6 September 2026 · **Status:** Sprint 0 complete, engine not started
 
 > **Standalone project.** No dependency on anything else. Nothing else needs to exist for
 > it to run.
@@ -36,6 +36,12 @@ records below.
 | 04 | HLD | Package boundaries, the request path, where the engine runs | Sprint 1 |
 | 05 | LLD | Rule set schema, the determination type, the audit trail format | Sprint 1 |
 | 09 | Test and eval plan | Golden vectors, property tests, the differential harness | Sprint 2 |
+
+## Measurements
+
+| # | Document | What it found |
+|---|---|---|
+| [01](measurements/01-rtb-calculator-algorithm.md) | The RTB Rent Calculator algorithm | The official calculation is client-side and readable. It diverges from section 19(4) on the CPI reference month and on pro-rating by whole months. Closed three open questions and corrected the worked example |
 | 11 | Interview pitch | How to explain it, demo it and defend it | Sprint 7 |
 | 12 | Reality check | Written during the build. Where the design was wrong | Sprint 7 |
 | 13 | Security and privacy | Threat model, what is enforced by a test, what is not done | Sprint 4 |
@@ -53,6 +59,7 @@ filled in the sprint named.
 | [0003](adr/ADR-0003-pinned-cpi-snapshots.md) | CPI is a pinned snapshot, not a live call | Reproducibility, and the statute points at the RTB's table rather than the CSO's |
 | [0004](adr/ADR-0004-user-initiated-fetch-not-crawl.md) | Fetch one page for one user, never crawl | robots.txt and terms, and RTB published data is the better baseline anyway |
 | [0005](adr/ADR-0005-typescript-and-a-pure-engine.md) | TypeScript, engine is pure | One implementation, runs in the browser, so rent and address never leave the device |
+| [0006](adr/ADR-0006-follow-the-calculator-show-the-statute.md) | Follow the RTB calculator, show the statutory figure too | The official tool diverges from section 19(4) in two places, and the landlord's notice will carry its number |
 
 ---
 
