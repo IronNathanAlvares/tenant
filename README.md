@@ -19,8 +19,13 @@ Research complete. No code yet. See [`SPRINTS.md`](SPRINTS.md) for what happens 
 | S3 | Notice validity | Not started |
 | S4 | Web app v1, live | Not started |
 | S5 | Explanation layer and dispute pack | Not started |
-| S6 | Listing check | Not started |
+| S6 | Listing check | Deferred, cut from v1 |
 | S7 | Ship | Not started |
+
+Hosted on Vercel, deployed from GitHub. The first release is the rent check, the notice
+check and the dispute pack. The listing scam checker is designed but deliberately not in
+it, because there is no honest way to measure it yet. See
+[`ADR-0004`](docs/adr/ADR-0004-user-initiated-fetch-not-crawl.md).
 
 ---
 

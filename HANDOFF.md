@@ -71,8 +71,15 @@ Listed with owners in `docs/01-research-and-analysis.md` §10 and as tasks 0.4 t
 `SPRINTS.md`. Tasks 0.4, 0.8 and 0.9 block Sprint 1. Do not start the engine before
 reading section 22 of the 2004 Act and the pre-2026 HICP regime.
 
+## Decisions taken, 6 September 2026
+
+- Repo is `github.com/IronNathanAlvares/tenant`, matching the convention set by
+  `mcp-sentinel`, `wayfinder` and `leafline`
+- Hosting is Vercel, deployed from GitHub. The free `*.vercel.app` URL is the public
+  address for v1. A custom domain is optional and nothing depends on it
+- Sprint 6, the listing check, is cut from the first release
+- One sprint per session, reviewed before the next starts
+
 ## Waiting on Nathan
 
-- GitHub repo created and the URL handed over
-- Domain choice
-- Whether Sprint 6, the listing check, is in or out of the first release
+- The GitHub repo URL, so the remote can be added and the first commit pushed

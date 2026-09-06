@@ -21,7 +21,15 @@ ship together. Surface 4 is the second half and ships later.
 | 1 | **Rent check** | Enters rent, dates and tenancy type. Gets the maximum lawful rent, whether the proposed one is lawful, and the calculation shown step by step with the provision cited | S4 |
 | 2 | **Notice check** | Answers six questions about how the notice arrived. Gets a list of specific defects, each citing a rule | S4 |
 | 3 | **What now** | Gets a printable pack: the calculation, the defects, a letter to the landlord, and where to go next | S5 |
-| 4 | **Listing check** | Pastes a rental advert. Gets scam signals and a rent plausibility check against RTB data | S6 |
+| 4 | **Listing check** | Pastes a rental advert. Gets scam signals and a rent plausibility check against RTB data | Deferred, not in v1 |
+
+**Scope decision, 6 September 2026.** Surface 4 is cut from the first release. Surfaces 1
+to 3 are a complete product on their own, and the listing checker is the one part with no
+honest way to measure itself yet. Sprint 6 stays written down so the reasoning survives,
+but it does not block shipping. See ADR-0004 for why there is no labelled corpus.
+
+**Working cadence.** One sprint per session, reviewed before the next starts. A sprint that
+cannot end with something running and something measured gets split rather than rushed.
 
 ---
 
@@ -42,7 +50,7 @@ ship together. Surface 4 is the second half and ships later.
 | 0.8 | Read section 22 of RTA 2004 in full. It governs rent review notices and Surface 2 depends on it | todo |
 | 0.9 | Read the pre-2026 HICP regime as it stood on 28 Feb 2026, for the section 19(6) path | todo |
 | 0.10 | Write `docs/02-PDD.md`, `docs/03-requirements.md` | todo |
-| 0.11 | Decide and buy the domain | todo |
+| 0.11 | Create the Vercel project, connect it to the GitHub repo, root directory `apps/web` | todo |
 
 **Do not start Sprint 1 until 0.4, 0.8 and 0.9 are done.** Writing the engine before
 reading section 22 means writing it twice.
@@ -166,10 +174,14 @@ an assertion in code, not a prompt instruction.
 
 ---
 
-## Sprint 6. Listing check
+## Sprint 6. Listing check (deferred, not in v1)
 
 **Goal:** Surface 4.
 **Ends with:** a signal-based checker that is honest about its confidence.
+
+Cut from the first release on 6 September 2026. Kept here because the design work is
+sound and the reasoning is worth preserving. Revisit once Surfaces 1 to 3 have real users,
+or if a labelled dataset becomes obtainable.
 
 | # | Task | Status |
 |---|---|---|
@@ -194,7 +206,7 @@ the README says so.
 
 | # | Task | Status |
 |---|---|---|
-| 7.1 | Domain live, HTTPS, security headers, sane CSP | todo |
+| 7.1 | Live on the Vercel URL, HTTPS, security headers, sane CSP. Custom domain optional | todo |
 | 7.2 | Lighthouse and axe pass. Real device testing | todo |
 | 7.3 | Three minute demo recording | todo |
 | 7.4 | `docs/12-reality-check.md`: everywhere the design was wrong during the build | todo |
