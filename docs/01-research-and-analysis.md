@@ -87,12 +87,19 @@ Rent last set 1 June 2025 at 2,000 euro. New setting 1 September 2026.
 - Current CPI would be August 2026. Last published at time of writing is July 2026, so
   the fallback applies: **106.7**
 - Index cap: 106.7 / 103.1 = 1.03492, so 3.49 per cent
-- Elapsed: 1 year and 92 days. Relevant percentage = 2% + 2% x (92/365) = **2.504 per cent**
-- Binding constraint is the percentage cap. Maximum lawful new rent = **2,050.08 euro**
+- Elapsed: 15 whole months. Relevant percentage = 2% x (15/12) = **2.5 per cent**
+- Binding constraint is the percentage cap. Maximum lawful new rent = **2,050.00 euro**
 
 A tool that only applies "2 per cent or CPI, whichever is lower" as a flat annual figure
 returns 2,040 here and is wrong by 10 euro a month. Over a six year tenancy that
 compounds into real money, and it is the kind of error that loses an RTB case.
+
+> **Corrected in Sprint 0.** This example originally read 2,050.08, from measuring the
+> part year in days (92/365). The RTB's own calculator pro-rates by whole months, giving
+> 2.5 per cent exactly and 2,050.00. The Act does not say how to measure part of a year,
+> so both are defensible readings, and we follow the official one. See
+> [`measurements/01`](measurements/01-rtb-calculator-algorithm.md) and
+> [`ADR-0006`](adr/ADR-0006-follow-the-calculator-show-the-statute.md).
 
 ---
 
@@ -199,6 +206,86 @@ guide:
 The same-day RTB rule is new, is procedural, is easy to breach, and voids the notice
 outright. Checking it needs one question that no existing tool asks. That is the highest
 value per line of code in this entire project.
+
+### 5a. The statutory checklist, from section 22 as amended
+
+Read in Sprint 0 from the consolidated text, with the 2026 amendments made by section 10
+of the 2026 Act. This is the complete specification for Surface 2.
+
+**Section 22(1) is the remedy.** A new rent set by review "shall not have effect unless
+and until the condition specified in subsection (2) is satisfied". A defective notice does
+not make the increase disputable. It makes it ineffective.
+
+The section 22(2) condition, and the section 22(2A) contents:
+
+| Provision | Requirement |
+|---|---|
+| 22(2) | Served at least **90 days** before the new rent takes effect |
+| 22(2) | In the **prescribed form** |
+| 22(2) | States the amount of the new rent and the date it takes effect |
+| 22(2) | A copy served on the Board **on the same day** it is served on the tenant |
+| 22(2A)(b) | States the deadline for referring a dispute (see §8 below) |
+| 22(2A)(c) | Landlord's statement that the new rent is not above market rent, having regard to the other terms and to register rent information for comparable dwellings |
+| 22(2A)(d) | **Three** comparable dwellings from the published register, each with the RT number assigned under section 135(3), of similar floor area, bedrooms, type, character and BER, in a comparable area |
+| 22(2A)(da) | The floor area of the subject dwelling |
+| 22(2A)(db) | The BER, where the EPBD regulations apply |
+| 22(2A)(e) | The date the notice was signed |
+| 22(2A)(f) | How the rent was calculated having regard to section 19(4), or why 19(4) does not apply |
+| 22(2A)(g) | How any increase in the rent last set was calculated, or why 19(4) does not apply |
+| 22(2B) | Signed by the landlord or an authorised agent |
+
+**Section 22(4), inserted by section 10 of the 2026 Act, makes it a criminal offence** for
+a landlord to set a rent by serving a notice otherwise than in accordance with the
+subsection (2) condition. That is a materially stronger fact than "the notice is invalid",
+and it is worth stating carefully rather than as a threat.
+
+Section 10(2) of the 2026 Act limits these amendments to notices served **after**
+commencement, so the checklist is itself date-dependent. Another argument for ADR-0001.
+
+### 5b. Review frequency is not simply "once every 12 months"
+
+Section 20(1) says a review may not occur more frequently than once in each period of 12
+months, nor in the first 12 months of a tenancy.
+
+Section 20(4) then says that **for the duration of the "relevant period"**, every
+reference to 12 months in subsection (1) is to be construed as **24 months**. Section
+20(6) defines the relevant period as ending two years after the Residential Tenancies
+(Amendment) Act 2025 came into operation. That Act was passed on 19 June 2025 and section
+5(2) brought it into operation "the day following its passing", so the relevant period
+runs to **20 June 2027**.
+
+Section 9 of the 2026 Act inserts a new section 20B. Subsection (2) says that where a
+tenancy commences on or after 1 March 2026, the review is carried out as if section
+20(4) to (6) had not been enacted, so those tenancies are plainly on 12 months.
+Subsection (1) preserves section 24C for tenancies it already applied to, which is the
+recently-designated-RPZ machinery, even though section 2 of the 2026 Act repeals sections
+24A, 24B, 24BA and 24C generally.
+
+**Here is the problem.** On the face of section 20, limiting the disapplication in 20B(2)
+to tenancies commencing on or after 1 March 2026 implies that subsections (4) to (6) still
+bite for tenancies that commenced before it, which would put those on a 24 month cycle
+until June 2027.
+
+The RTB does not say that. Its calculator page says reviews are "once every 12 months",
+with a 24 month rule only "for tenancies in areas that became an RPZ in the last 2 years",
+which is the section 24C path preserved by 20B(1), and the page offers an Eircode lookup
+for the designation date.
+
+I cannot resolve this from the text alone and I am not going to pretend otherwise. It may
+be that a commencement order or a provision I have not found ends the relevant period, or
+that the RTB's reading of 20B is simply the correct one and mine over-reads the negative
+implication.
+
+**What the product does about it.** The frequency check reports the RTB's position as the
+answer, and flags the argument on the face of section 20 as a secondary note for
+pre-1-March-2026 tenancies reviewed inside 24 months, pointing at Threshold. It does not
+tell anyone their landlord broke the law on the strength of my reading of a negative
+implication. This is open question 7 and it is the one I would most like a solicitor to
+look at.
+
+Note also, from the annotations to section 20: the Affordable Housing Act 2021 section
+33(1) provides that **Part 3 of the 2004 Act does not apply to the setting of rent under a
+cost rental tenancy**. That is the precise citation for the cost rental exclusion in §3c.
 
 ---
 
@@ -325,11 +412,36 @@ Verified partially. The RTB runs mediation, which is free, and adjudication, whi
 go to `disputes@rtb.ie` or by post to the RTB in Killorglin. Threshold operates a free
 national advice service on 1800 454 454.
 
-**Not yet verified and flagged as a Sprint 0 task:** the exact time limit for disputing a
-rent review or an unlawful rent, and whether the 28 day window that applies to
-termination notices has any analogue here. I am not putting a number on a limitation
-period in the product until I have read it in the Act. Getting a deadline wrong is the
-one error in this domain that cannot be undone by the user.
+### 8a. The limitation period, closed in Sprint 0
+
+Section 22(3) RTA 2004. A dispute about a rent set on review must be referred to the
+Board under Part 6 before:
+
+> "(a) the date stated in the notice under subsection (2) as the date from which that rent
+> is to have effect, or (b) the expiry of 28 days from the receipt by the tenant of that
+> notice, whichever is the later."
+
+Because the notice must be served at least 90 days before the new rent takes effect, the
+effective date is normally the later of the two. **So in practice the deadline is the day
+the new rent takes effect.** A tenant who lets that date pass without referring has lost
+the ability to dispute the amount.
+
+This is the single most urgent number in the product and it should be the most prominent
+thing on the result page when an increase looks unlawful. It is also why the tool has to
+ask for the effective date rather than inferring it.
+
+Two things soften it, and both need care rather than confidence:
+
+Section 22(2A)(b) requires the notice itself to state this deadline. A notice that does
+not state it is defective on that ground alone.
+
+Section 22(3) opens with "Where that condition is satisfied". The condition is the
+section 22(2) one. Where the notice did not comply, section 22(1) means the new rent never
+took effect at all, which is a continuing state rather than an event with a deadline
+attached. Whether that defers the section 22(3) limit is a real legal question and not one
+to answer in a footer. The product should surface the deadline, note that a defective
+notice may change the analysis, and send the person to Threshold or the RTB rather than
+reason it out for them.
 
 ---
 
@@ -357,15 +469,23 @@ Five conclusions, each of which becomes a decision record.
 
 ## 10. Open questions
 
-| # | Question | Blocks | How to resolve |
+| # | Question | Status | Answer |
 |---|---|---|---|
-| 1 | Limitation period for disputing a rent review | The "what now" surface | Read Part 6 of the 2004 Act |
-| 2 | Does the RTB publish its CPI table in a machine readable form | Ingest design | Inspect the calculator page markup |
-| 3 | Exact current dispute fees | Dispute pack copy | RTB disputes page |
-| 4 | Rounding convention the RTB calculator uses | Golden vector match rate | Differential testing, Sprint 2 |
-| 5 | How "year elapsed" is counted for the relevant percentage, calendar years or 365 day periods | Every calculation | Differential testing, Sprint 2 |
-| 6 | Whether the RTB calculator is scriptable for ground truth harvesting | Sprint 2 method | Load it in a browser and look |
+| 1 | Limitation period for disputing a rent review | **Closed** | Section 22(3). The later of the rent's effective date or 28 days from receipt. In practice the effective date. See §8a |
+| 2 | Does the RTB publish its CPI table in a machine readable form | **Closed** | It renders the table in the page and reads CSO CPM24C01 client side. Values reconcile exactly with our snapshot |
+| 3 | Exact current dispute fees | **Partly** | Mediation free, adjudication 30 euro per Citizens Information. Not yet read off the RTB's own fees page |
+| 4 | Rounding convention | **Closed** | Half up to the cent on the new rent, then the increase by subtraction in integer cents. See `measurements/01` |
+| 5 | How a part year is measured | **Closed** | Whole months, with `if (day_b < day_a) months -= 1`. See `measurements/01` |
+| 6 | Is the RTB calculator scriptable | **Closed, better than hoped** | The whole calculation is client-side JavaScript and readable. Sprint 2 changes shape accordingly |
+| 7 | Does the 24 month review frequency still bite for pre-1-March-2026 tenancies | **Open, and it matters** | My reading of section 20(4) to (6) with the new 20B(2) says yes until 20 June 2027. The RTB says 12 months except on the section 24C path. See §5b |
+| 8 | Which sections of the 2026 Act commenced on which day, per the commencement order | **Open** | Section 1(2) commences most of the Act by ministerial order. 1 March 2026 is universally reported but I have not found the S.I. itself |
 
-Questions 4 and 5 are the interesting ones. The statute does not specify a rounding rule
-or a day count convention, so the only way to match the official calculator is to probe
-it. That probing is Sprint 2 and it produces the headline metric.
+Questions 4, 5 and 6 were expected to be Sprint 2 work resolved by black-box probing. They
+were closed in Sprint 0 instead by reading the official implementation, which also turned
+up two divergences between that implementation and the statute. That is the most
+interesting finding in the project so far and it is written up in
+[`measurements/01`](measurements/01-rtb-calculator-algorithm.md).
+
+Question 7 is the one that most needs a second opinion from someone who practises in this
+area. Question 8 is housekeeping but it needs doing before the dated rules engine can
+claim its commencement dates are sourced rather than assumed.

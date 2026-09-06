@@ -40,20 +40,35 @@ cannot end with something running and something measured gets split rather than 
 
 | # | Task | Status |
 |---|---|---|
-| 0.1 | Create the GitHub repo, push the scaffold, protect `main` | todo |
-| 0.2 | pnpm workspace, TypeScript strict, Vitest, Biome, tsconfig project refs | todo |
-| 0.3 | GitHub Actions: typecheck, lint, test, build. No warnings tolerated | todo |
-| 0.4 | Close open question 1: limitation period for disputing a rent review. Read Part 6 RTA 2004 | todo |
-| 0.5 | Close open question 2: is the RTB CPI table machine readable | todo |
-| 0.6 | Close open question 3: current RTB dispute fees, verbatim from rtb.ie | todo |
-| 0.7 | Properly review righttenantry.ie, propdesk.ie, tenantsync.ie. One paragraph each in doc 01 §7 | todo |
-| 0.8 | Read section 22 of RTA 2004 in full. It governs rent review notices and Surface 2 depends on it | todo |
-| 0.9 | Read the pre-2026 HICP regime as it stood on 28 Feb 2026, for the section 19(6) path | todo |
-| 0.10 | Write `docs/02-PDD.md`, `docs/03-requirements.md` | todo |
-| 0.11 | Create the Vercel project, connect it to the GitHub repo, root directory `apps/web` | todo |
+| 0.1 | Create the GitHub repo, push the scaffold | **done** |
+| 0.2 | pnpm workspace, TypeScript strict, Vitest, Biome, tsconfig project refs | **done** |
+| 0.3 | GitHub Actions: typecheck, lint, test, build. No warnings tolerated | **done** |
+| 0.4 | Close open question 1: limitation period for disputing a rent review | **done.** Section 22(3). Doc 01 §8a |
+| 0.5 | Close open question 2: is the RTB CPI table machine readable | **done.** It reads CSO CPM24C01 client side and its values reconcile exactly with our snapshot |
+| 0.6 | Close open question 3: current RTB dispute fees, verbatim from rtb.ie | **partly.** Mediation free, adjudication 30 euro from Citizens Information. Not read off the RTB fees page itself |
+| 0.7 | Properly review righttenantry.ie, propdesk.ie, tenantsync.ie | **not done.** Carried to Sprint 2 |
+| 0.8 | Read section 22 of RTA 2004 in full | **done.** Full checklist in doc 01 §5a |
+| 0.9 | Read the pre-2026 HICP regime for the section 19(6) path | **done.** Same two-constraint shape with HICP. RTA(A) 2025 deemed the whole State an RPZ from 20 June 2025, so geography stops mattering after that date |
+| 0.10 | Write `docs/02-PDD.md`, `docs/03-requirements.md` | **not done.** Carried to Sprint 1 |
+| 0.11 | Create the Vercel project, connect it to the GitHub repo | **done** by Nathan |
+| 0.12 | Minimal `apps/web` that actually deploys, so the Vercel path is proven now rather than in Sprint 4 | **done.** Added mid-sprint after the deployment 404'd |
+| 0.13 | CPI freshness check that fails the build when the CSO publishes a month we do not have | **done.** `scripts/check_cpi_freshness.py`, wired into CI |
 
-**Do not start Sprint 1 until 0.4, 0.8 and 0.9 are done.** Writing the engine before
-reading section 22 means writing it twice.
+### What Sprint 0 actually found
+
+Reading the RTB Rent Calculator turned out to be the whole story. Its calculation runs
+client side, so the official algorithm could be read rather than probed, which closed
+three open questions early and turned up two places where the official implementation does
+not match section 19(4). Written up in
+[`docs/measurements/01`](docs/measurements/01-rtb-calculator-algorithm.md), decided in
+[`ADR-0006`](docs/adr/ADR-0006-follow-the-calculator-show-the-statute.md).
+
+That correction moved the README's worked example from 2,050.08 to 2,050.00.
+
+One new open question came out of it, number 7 in doc 01 §10: whether the 24 month review
+frequency still bites for tenancies that started before 1 March 2026. My reading of section
+20(4) to (6) with the new section 20B says it does until 20 June 2027. The RTB says
+otherwise. That one needs a solicitor, not more reading.
 
 ---
 
@@ -66,6 +81,7 @@ regime matrix covered by tests.
 
 | # | Task | Status |
 |---|---|---|
+| 1.0 | Carried from Sprint 0: write `docs/02-PDD.md` and `docs/03-requirements.md` | todo |
 | 1.1 | `packages/rules`: types for `RentQuery`, `Determination`, `AuditStep`, `Citation` | todo |
 | 1.2 | CPI ingest script: CSO CPM24 JSON-stat to a flat `{ month, value }` snapshot with a content hash | todo |
 | 1.3 | CPI lookup with the publication-lag fallback, both the current and previous variants | todo |
@@ -93,14 +109,14 @@ rounding and day-count conventions settled by evidence rather than guess.
 
 | # | Task | Status |
 |---|---|---|
-| 2.1 | Load the RTB Rent Calculator in a browser, work out whether it is drivable | todo |
-| 2.2 | If drivable: harvest N ground truth pairs across both regimes and the new-build flag | todo |
-| 2.3 | If not drivable: hand-enter a smaller stratified set and record every screenshot as evidence | todo |
-| 2.4 | Golden vector file, checked into `data/vectors`, with provenance per row | todo |
-| 2.5 | Differential test: our engine against every vector. Publish the match rate | todo |
-| 2.6 | Settle open questions 4 and 5 from the disagreements, write up what the RTB actually does | todo |
+| 2.1 | ~~Work out whether the RTB calculator is drivable~~ **Done in Sprint 0.** It is client-side JS and was read directly | done |
+| 2.2 | Port the RTB algorithm as a **reference oracle** in the test suite, from `measurements/01`, kept separate from our engine | todo |
+| 2.3 | Randomised differential testing of our engine against the oracle, large N | todo |
+| 2.4 | Drive the real form on a small stratified sample to prove the oracle is faithful. This is the step that keeps the whole thing honest | todo |
+| 2.5 | Golden vector file in `data/vectors` with provenance per row, and the published match rate | todo |
+| 2.6 | Carried from Sprint 0: review righttenantry.ie, propdesk.ie, tenantsync.ie properly | todo |
 | 2.7 | Property tests with fast-check: monotonic in old rent, never exceeds either cap, stable under date reordering | todo |
-| 2.8 | Write `docs/measurements/01-rtb-calculator-agreement.md`, including every case we do not match and why | todo |
+| 2.8 | Write `docs/measurements/02-engine-agreement.md`, including every case we do not match and why | todo |
 
 **Report the failures.** A match rate of 100 per cent on 12 easy cases is worth less than
 97 per cent on 400 with the three failures explained. If we disagree with the RTB

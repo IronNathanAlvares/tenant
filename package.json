@@ -1,0 +1,24 @@
+{
+  "name": "tenant",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "tsc --build --force",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "vitest run",
+    "build": "pnpm --filter @tenant/web build",
+    "cpi:build": "python scripts/build_cpi_snapshot.py",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
+    "fast-check": "^3.23.0"
+  }
+}

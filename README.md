@@ -9,11 +9,12 @@ Standalone project. Nothing else needs to exist for it to run.
 
 ## Status
 
-Research complete. No code yet. See [`SPRINTS.md`](SPRINTS.md) for what happens next.
+Sprint 0 complete. The workspace builds, tests and deploys. The rules engine itself is Sprint 1.
+See [`SPRINTS.md`](SPRINTS.md) for what happens next.
 
 | Sprint | What | State |
 |---|---|---|
-| **S0** | Foundations, remaining research, repo, CI | Not started |
+| **S0** | Foundations, remaining research, repo, CI | **Complete.** CI green, deploy path proven, and it found something (below) |
 | S1 | The dated rules engine | Not started |
 | S2 | Ground truth against the official RTB calculator | Not started |
 | S3 | Notice validity | Not started |
@@ -76,12 +77,26 @@ month *before* it if it happened on or after. That asymmetry is in the statute, 
 the index by a month, and nothing I have seen implements it.
 
 Worked example with live CSO data: rent last set at 2,000 euro on 1 June 2025, reviewed
-on 1 September 2026. The index cap allows 3.49 per cent. The percentage cap allows 2.504
-per cent. The lawful maximum is **2,050.08 euro**. A tool applying a flat "2 per cent or
-CPI" says 2,040.
+on 1 September 2026. The index cap allows 3.49 per cent. The percentage cap allows 2.5 per
+cent. The lawful maximum is **2,050.00 euro**, an increase of 50.00. A tool applying a
+flat "2 per cent or CPI" says 2,040.
 
 Full derivation and every source in
 [`docs/01-research-and-analysis.md`](docs/01-research-and-analysis.md).
+
+## The official calculator does not match the statute
+
+The RTB Rent Calculator runs entirely in the browser, so its algorithm can be read rather
+than guessed at. It diverges from section 19(4) in two places: it takes CPI from the month
+*of* each date rather than the month before, and it pro-rates by whole months rather than
+by any finer measure. Neither is obviously wrong, and the second is arguably the more
+sensible reading of an Act that does not say how to measure part of a year.
+
+We follow the calculator, because that is the number the landlord's notice will carry, and
+we show the statutory figure alongside it when the two differ. Reasoning in
+[`ADR-0006`](docs/adr/ADR-0006-follow-the-calculator-show-the-statute.md), the algorithm
+itself in
+[`docs/measurements/01`](docs/measurements/01-rtb-calculator-algorithm.md).
 
 ## The architecture, in one paragraph
 
