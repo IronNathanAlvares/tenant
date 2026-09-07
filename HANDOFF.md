@@ -88,17 +88,44 @@ found, and the dated rules engine should not claim sourced commencement dates un
 
 ## Waiting on Nathan
 
-- **The Vercel deployment still returns 404.** See below.
+- **One Vercel dashboard setting.** See below. It is the only thing blocking a live URL.
 - A second opinion on open question 7, ideally from Threshold or a solicitor.
 
-### The Vercel 404, diagnosed and fixed
+### The Vercel 404, diagnosed
 
-The first four production deployments failed, which is why the URL served a 404 while CI
-was green. Vercel's build log needs account access, so the cause was found from the
-outside instead: GitHub's deployment API showed `state=failure`, a clean clone of the repo
-installed and built perfectly with the exact commands in `vercel.json`, which ruled out the
-code, and the remaining difference was the package manager.
+Every production deployment so far has failed, which is why the URL serves a 404 while CI
+is green. Vercel's build log needs account access, so the cause was narrowed from the
+outside instead.
 
-Vercel does not support pnpm 11. It falls back to pnpm 9, which fails on the pnpm 11
-`allowBuilds` key that was in `pnpm-workspace.yaml`. Fixed by targeting pnpm 10.34.5 and
-moving the build allowlist into `package.json`. See the pnpm note above.
+What was ruled out:
+
+- **The code.** A clean clone of the repo installs and builds a working static page with
+  the exact commands Vercel runs.
+- **pnpm 11.** Vercel does not support it and falls back to pnpm 9, which fails on pnpm 11
+  syntax in `pnpm-workspace.yaml` (vercel/vercel#17434). Real problem, now fixed by
+  targeting pnpm 10.34.5, but it was not the only one, because the next deployment failed
+  too.
+
+What is left, and it matches a well documented Vercel failure exactly: the project's **Root
+Directory is the repo root**, so Vercel reads the root `package.json`, does not find `next`
+in it, and fails with "No Next.js version detected". Setting `outputDirectory` in a
+`vercel.json` does not fix this and makes it worse, so that file has been deleted.
+
+**The fix, in the Vercel dashboard, Settings, Build and Deployment:**
+
+1. Set **Root Directory** to `apps/web`
+2. Confirm **Framework Preset** is **Next.js** (it should auto-detect once the root
+   directory is right)
+3. Leave Build and Install commands on their defaults. Vercel installs from the pnpm
+   workspace root on its own once it sees `pnpm-workspace.yaml` above the root directory
+4. Redeploy
+
+**If it still fails,** stop guessing and grab the log:
+
+```bash
+npx vercel login
+npx vercel inspect <deployment-url> --logs
+```
+
+The failing deployment IDs are visible without auth via
+`gh api repos/IronNathanAlvares/tenant/deployments`.
