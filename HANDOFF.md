@@ -61,6 +61,14 @@ arithmetic to match its output. Keep that quarantined in the oracle.
 **Next rewrites `apps/web/tsconfig.json` on every build.** Biome is configured to ignore
 it. Do not fight this.
 
+**Stay on pnpm 10. Do not bump `packageManager` to 11 or 12.** Vercel does not support
+pnpm 11 yet (vercel/vercel#17434). When it sees an unsupported version it silently falls
+back to pnpm 9, which then fails on any pnpm 11 syntax in `pnpm-workspace.yaml`. That is
+what caused the first four deployments to fail while CI stayed green, because CI honours
+`packageManager` and Vercel does not. For the same reason the esbuild build allowlist
+lives in `package.json` under `pnpm.onlyBuiltDependencies` rather than as `allowBuilds` in
+`pnpm-workspace.yaml`: older pnpm ignores the former and chokes on the latter.
+
 **The RTB calculator displays the maximum *increase*, not the maximum new rent.** When
 comparing our output to theirs, compare the right quantity.
 
@@ -83,33 +91,14 @@ found, and the dated rules engine should not claim sourced commencement dates un
 - **The Vercel deployment still returns 404.** See below.
 - A second opinion on open question 7, ideally from Threshold or a solicitor.
 
-### The Vercel 404
+### The Vercel 404, diagnosed and fixed
 
-`https://tenant-green.vercel.app/` returns `X-Vercel-Error: NOT_FOUND` as of the last
-push. GitHub has the code, CI is green, and `pnpm build` produces a working static page
-locally, so this is a Vercel project configuration problem rather than a code one. The CLI
-here is not authenticated and it is your account, so it needs you.
+The first four production deployments failed, which is why the URL served a 404 while CI
+was green. Vercel's build log needs account access, so the cause was found from the
+outside instead: GitHub's deployment API showed `state=failure`, a clean clone of the repo
+installed and built perfectly with the exact commands in `vercel.json`, which ruled out the
+code, and the remaining difference was the package manager.
 
-There is a `vercel.json` at the repo root that should make this zero-config:
-
-```json
-{
-  "buildCommand": "pnpm --filter @tenant/web build",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": "apps/web/.next",
-  "framework": "nextjs"
-}
-```
-
-In the Vercel dashboard, check in this order:
-
-1. **Deployments tab.** Is there a deployment for commit `515daa4`? If it failed, the build
-   log says why and that is the actual answer.
-2. **Settings, General, Framework Preset.** If it was saved as "Other" when the repo had no
-   app, that overrides `vercel.json`. Set it to **Next.js**.
-3. **Settings, General, Root Directory.** Should be the repo root, blank or `./`.
-4. Redeploy.
-
-If that does not take, the alternative is Root Directory `apps/web` with "Include files
-outside of the Root Directory in the Build Step" enabled, in which case delete the root
-`vercel.json` so the two do not fight.
+Vercel does not support pnpm 11. It falls back to pnpm 9, which fails on the pnpm 11
+`allowBuilds` key that was in `pnpm-workspace.yaml`. Fixed by targeting pnpm 10.34.5 and
+moving the build allowlist into `package.json`. See the pnpm note above.

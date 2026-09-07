@@ -1,7 +1,3 @@
 packages:
   - packages/*
   - apps/*
-
-# esbuild ships a platform binary that vitest needs at runtime.
-allowBuilds:
-  esbuild: true
