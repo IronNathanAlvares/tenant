@@ -1,0 +1,30 @@
+{
+  "generatedBy": "packages/rules/tests/agreement-report.test.ts",
+  "oracle": {
+    "source": "https://rtb.ie/wp-content/themes/rtb/assets/rent-calc/Scripts/rent-calc.js",
+    "sha256": "1f7a50b86efaba3197232cce6a3d8f86b3f08a651d3a8e6673b6bf83b01432d7",
+    "retrieved": "2026-09-06"
+  },
+  "casesCompared": 2720,
+  "headlineAgreementPercent": 100,
+  "headlineDisagreements": 0,
+  "statutoryDisagreements": 1484,
+  "statutoryDisagreementPercent": 54.5588,
+  "statutoryGapCents": {
+    "count": 1484,
+    "median": 405,
+    "p90": 2872,
+    "p99": 16438,
+    "max": 17336,
+    "withinFiveCent": 62,
+    "statutoryHigher": 854,
+    "statutoryLower": 630
+  },
+  "coverage": {
+    "percentageCapBinding": 936,
+    "indexCapBinding": 1784,
+    "usedCpiPublicationFallback": 1040,
+    "newBuildExemptCases": 1360,
+    "zeroIncreaseCases": 1068
+  }
+}
