@@ -103,7 +103,21 @@ build log. Recorded because the next person will hit at least one of them.
    `next`, and failed with "No Next.js version detected". A `vercel.json` at the repo root
    setting `outputDirectory` does not fix this and is a documented way to make it worse, so
    that file was deleted. Fixed in the dashboard: Root Directory is now `apps/web`.
-3. **Builds were then skipped.** With a Root Directory set, Vercel only rebuilds when files
+3. **Files outside the root directory were not included.** With Root Directory set to
+   `apps/web`, Vercel uploads only that folder unless told otherwise, and `apps/web`
+   depends on `@tenant/rules` by `workspace:*` and extends `../../tsconfig.base.json`.
+   Reproduced locally by installing `apps/web` on its own:
+
+   ```
+   ERR_PNPM_WORKSPACE_PKG_NOT_FOUND
+   "@tenant/rules@workspace:*" is in the dependencies but no package
+   named "@tenant/rules" is present in the workspace
+   ```
+
+   Fixed in the dashboard: Settings, Build and Deployment, under Root Directory, enable
+   **Include files outside of the Root Directory in the Build Step**.
+
+4. **Builds were then skipped.** With a Root Directory set, Vercel only rebuilds when files
    inside it change, and reported `Skipped - Not affected`. That default is wrong here,
    because `apps/web` imports `@tenant/rules` and `@tenant/cpi`, so an engine change must
    redeploy the site. Fixed by `apps/web/vercel.json` with `"ignoreCommand": "exit 1"`,
