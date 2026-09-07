@@ -91,41 +91,34 @@ found, and the dated rules engine should not claim sourced commencement dates un
 - **One Vercel dashboard setting.** See below. It is the only thing blocking a live URL.
 - A second opinion on open question 7, ideally from Threshold or a solicitor.
 
-### The Vercel 404, diagnosed
+### The Vercel deployment, resolved
 
-Every production deployment so far has failed, which is why the URL serves a 404 while CI
-is green. Vercel's build log needs account access, so the cause was narrowed from the
-outside instead.
+Three separate causes, found in order, none of them visible without account access to the
+build log. Recorded because the next person will hit at least one of them.
 
-What was ruled out:
+1. **pnpm 11 is unsupported.** Vercel falls back to pnpm 9, which failed on the pnpm 11
+   `allowBuilds` key in `pnpm-workspace.yaml` (vercel/vercel#17434). Fixed by pinning
+   `packageManager` to pnpm 10.34.5 and moving the build allowlist into `package.json`.
+2. **Root Directory was the repo root.** Vercel read the root `package.json`, found no
+   `next`, and failed with "No Next.js version detected". A `vercel.json` at the repo root
+   setting `outputDirectory` does not fix this and is a documented way to make it worse, so
+   that file was deleted. Fixed in the dashboard: Root Directory is now `apps/web`.
+3. **Builds were then skipped.** With a Root Directory set, Vercel only rebuilds when files
+   inside it change, and reported `Skipped - Not affected`. That default is wrong here,
+   because `apps/web` imports `@tenant/rules` and `@tenant/cpi`, so an engine change must
+   redeploy the site. Fixed by `apps/web/vercel.json` with `"ignoreCommand": "exit 1"`,
+   which tells Vercel never to skip. Exit 0 means skip, exit 1 means build.
 
-- **The code.** A clean clone of the repo installs and builds a working static page with
-  the exact commands Vercel runs.
-- **pnpm 11.** Vercel does not support it and falls back to pnpm 9, which fails on pnpm 11
-  syntax in `pnpm-workspace.yaml` (vercel/vercel#17434). Real problem, now fixed by
-  targeting pnpm 10.34.5, but it was not the only one, because the next deployment failed
-  too.
+**Two things worth knowing.** Changing Root Directory does not retry past deployments, so
+nothing rebuilds until the next push or a manual redeploy. The Redeploy button is on the
+Deployments tab, in the three-dot menu on a deployment row, not in Settings.
 
-What is left, and it matches a well documented Vercel failure exactly: the project's **Root
-Directory is the repo root**, so Vercel reads the root `package.json`, does not find `next`
-in it, and fails with "No Next.js version detected". Setting `outputDirectory` in a
-`vercel.json` does not fix this and makes it worse, so that file has been deleted.
-
-**The fix, in the Vercel dashboard, Settings, Build and Deployment:**
-
-1. Set **Root Directory** to `apps/web`
-2. Confirm **Framework Preset** is **Next.js** (it should auto-detect once the root
-   directory is right)
-3. Leave Build and Install commands on their defaults. Vercel installs from the pnpm
-   workspace root on its own once it sees `pnpm-workspace.yaml` above the root directory
-4. Redeploy
-
-**If it still fails,** stop guessing and grab the log:
+**If a deployment fails again,** get the log rather than guessing:
 
 ```bash
 npx vercel login
 npx vercel inspect <deployment-url> --logs
 ```
 
-The failing deployment IDs are visible without auth via
+Deployment ids and states are readable without auth via
 `gh api repos/IronNathanAlvares/tenant/deployments`.
