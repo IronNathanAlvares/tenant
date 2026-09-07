@@ -51,7 +51,7 @@ cannot end with something running and something measured gets split rather than 
 | 0.9 | Read the pre-2026 HICP regime for the section 19(6) path | **done.** Same two-constraint shape with HICP. RTA(A) 2025 deemed the whole State an RPZ from 20 June 2025, so geography stops mattering after that date |
 | 0.10 | Write `docs/02-PDD.md`, `docs/03-requirements.md` | **not done.** Carried to Sprint 1 |
 | 0.11 | Create the Vercel project, connect it to the GitHub repo | **done** by Nathan |
-| 0.12 | Minimal `apps/web` that actually deploys, so the Vercel path is proven now rather than in Sprint 4 | **done.** Added mid-sprint after the deployment 404'd |
+| 0.12 | Minimal `apps/web` that actually deploys, so the Vercel path is proven now rather than in Sprint 4 | **blocked on one dashboard setting.** The app builds from a clean clone with Vercel's own commands. Vercel's Root Directory needs to be `apps/web`. See HANDOFF |
 | 0.13 | CPI freshness check that fails the build when the CSO publishes a month we do not have | **done.** `scripts/check_cpi_freshness.py`, wired into CI |
 
 ### What Sprint 0 actually found
@@ -69,6 +69,12 @@ One new open question came out of it, number 7 in doc 01 §10: whether the 24 mo
 frequency still bites for tenancies that started before 1 March 2026. My reading of section
 20(4) to (6) with the new section 20B says it does until 20 June 2027. The RTB says
 otherwise. That one needs a solicitor, not more reading.
+
+Adding 0.12 was worth it precisely because it failed. Every Vercel deployment has been
+failing while CI stayed green, and finding that out now cost an hour. Finding it out in
+Sprint 4, with a real app to debug at the same time, would have cost a lot more. Two
+separate causes so far: pnpm 11 is unsupported by Vercel, and the project's Root Directory
+points at the repo root. The first is fixed in the repo, the second needs the dashboard.
 
 ---
 
