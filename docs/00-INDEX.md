@@ -31,21 +31,21 @@ records below.
 | # | Document | Answers | State |
 |---|---|---|---|
 | 01 | [Research and analysis](01-research-and-analysis.md) | What the law actually says, where the data is, what already exists and why it is wrong | Written |
-| 02 | PDD | What we are building and what we are deliberately not building | Sprint 0 |
-| 03 | Requirements | What exactly it must do and how we will know | Sprint 0 |
+| 02 | PDD | What we are building and what we are deliberately not building | Sprint 1 |
+| 03 | Requirements | What exactly it must do and how we will know | Sprint 1 |
 | 04 | HLD | Package boundaries, the request path, where the engine runs | Sprint 1 |
 | 05 | LLD | Rule set schema, the determination type, the audit trail format | Sprint 1 |
 | 09 | Test and eval plan | Golden vectors, property tests, the differential harness | Sprint 2 |
+| 11 | Interview pitch | How to explain it, demo it and defend it | Sprint 7 |
+| 12 | Reality check | Written during the build. Where the design was wrong | Sprint 7 |
+| 13 | Security and privacy | Threat model, what is enforced by a test, what is not done | Sprint 4 |
+| 14 | Running it | Every command in order, and what each should print | Sprint 4 |
 
 ## Measurements
 
 | # | Document | What it found |
 |---|---|---|
 | [01](measurements/01-rtb-calculator-algorithm.md) | The RTB Rent Calculator algorithm | The official calculation is client-side and readable. It diverges from section 19(4) on the CPI reference month and on pro-rating by whole months. Closed three open questions and corrected the worked example |
-| 11 | Interview pitch | How to explain it, demo it and defend it | Sprint 7 |
-| 12 | Reality check | Written during the build. Where the design was wrong | Sprint 7 |
-| 13 | Security and privacy | Threat model, what is enforced by a test, what is not done | Sprint 4 |
-| 14 | Running it | Every command in order, and what each should print | Sprint 4 |
 
 Numbering matches the convention used in `03-leafline`. Gaps are intentional and get
 filled in the sprint named.
