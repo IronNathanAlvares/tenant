@@ -9,13 +9,13 @@ Standalone project. Nothing else needs to exist for it to run.
 
 ## Status
 
-Sprint 0 complete. The workspace builds, tests and deploys. The rules engine itself is Sprint 1.
+The rules engine is built and tested. The site is still a placeholder.
 See [`SPRINTS.md`](SPRINTS.md) for what happens next.
 
 | Sprint | What | State |
 |---|---|---|
 | **S0** | Foundations, remaining research, repo, CI | **Complete.** CI green, deploy path proven, and it found something (below) |
-| S1 | The dated rules engine | Not started |
+| S1 | The dated rules engine | **Complete.** 90 tests. One gap left open on purpose, below |
 | S2 | Ground truth against the official RTB calculator | Not started |
 | S3 | Notice validity | Not started |
 | S4 | Web app v1, live | Not started |
@@ -97,6 +97,40 @@ we show the statutory figure alongside it when the two differ. Reasoning in
 [`ADR-0006`](docs/adr/ADR-0006-follow-the-calculator-show-the-statute.md), the algorithm
 itself in
 [`docs/measurements/01`](docs/measurements/01-rtb-calculator-algorithm.md).
+
+## What the engine does today
+
+```ts
+const result = evaluateRent(
+  {
+    tenancyKind: "private",
+    previousSetting: parseDate("2025-06-01"),
+    previousRent: parseEuro("2000"),
+    newSetting: parseDate("2026-09-01"),
+    newBuildExemption: "no",
+    asOf: parseDate("2026-09-01"),
+  },
+  CPI_SNAPSHOT,
+);
+// result.headline.maxRent   -> 2050.00, the RTB basis
+// result.statutory.maxRent  -> 2050.08, reading section 19(4) strictly
+// result.basesAgree         -> false, and the audit trail says why
+```
+
+Ask it something it cannot honestly answer and it does not guess:
+
+```ts
+evaluateRent({ ...query, newBuildExemption: "unknown" }, CPI_SNAPSHOT);
+// outcome: "unknown"
+// question: "Is this dwelling in an apartment complex ... on or after 10 June 2025?"
+// branches: [ 2069.84 if it qualifies, 2050.00 if it does not ]
+// howToFindOut: "Ask the landlord directly. They must be able to produce the
+//                commencement notice if the RTB investigates ..."
+```
+
+A rent review notice served before 1 March 2026 is detected, cited to section 19(6) and
+refused rather than answered, because the pre-2026 HICP arithmetic is not built yet. Saying
+so is better than guessing at it.
 
 ## The architecture, in one paragraph
 

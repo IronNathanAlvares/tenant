@@ -87,23 +87,41 @@ regime matrix covered by tests.
 
 | # | Task | Status |
 |---|---|---|
-| 1.0 | Carried from Sprint 0: write `docs/02-PDD.md` and `docs/03-requirements.md` | todo |
-| 1.1 | `packages/rules`: types for `RentQuery`, `Determination`, `AuditStep`, `Citation` | todo |
-| 1.2 | CPI ingest script: CSO CPM24 JSON-stat to a flat `{ month, value }` snapshot with a content hash | todo |
-| 1.3 | CPI lookup with the publication-lag fallback, both the current and previous variants | todo |
-| 1.4 | Regime resolver: given tenancy facts and a date, return which of the seven regimes applies | todo |
-| 1.5 | Constraint A, relevant percentage. Simple not compound, whole years plus pro-rated remainder | todo |
-| 1.6 | Constraint B, index ratio, with the pre/post 1 March 2026 reference month asymmetry | todo |
-| 1.7 | Section 19(5) market rent paths, returning "no cap applies" with the reason | todo |
-| 1.8 | Section 19(6) in-flight notice path, routing to the HICP regime | todo |
-| 1.9 | Every branch returns a `Citation` with Act, section, subsection and a URL | todo |
-| 1.10 | Audit trail: an ordered list of steps a human can check by hand | todo |
-| 1.11 | `Unknown` as a first-class result when an input the tool cannot verify decides the answer | todo |
+| 1.0 | Carried from Sprint 0: write `docs/02-PDD.md` and `docs/03-requirements.md` | **done.** Requirements carry IDs the tests reference |
+| 1.1 | `packages/rules`: types for `RentQuery`, `Determination`, `AuditStep`, `Citation` | **done** |
+| 1.2 | CPI ingest, plus `packages/cpi` which validates the snapshot at load | **done.** The validator caught a real field-name mismatch on its first run |
+| 1.3 | CPI lookup with the publication-lag fallback, both the current and previous variants | **done** |
+| 1.4 | Regime resolver: given tenancy facts and a date, return which of the seven regimes applies | **done.** Exhaustive at compile time via `assertNever` |
+| 1.5 | Constraint A, relevant percentage. Simple not compound, whole years plus pro-rated remainder | **done.** Both the whole-month and day-count readings |
+| 1.6 | Constraint B, index ratio, with the pre/post 1 March 2026 reference month asymmetry | **done.** The asymmetry has its own tests |
+| 1.7 | Section 19(5) market rent paths, returning "no cap applies" with the reason | **done** |
+| 1.8 | Section 19(6) in-flight notice path | **partly.** Detected, cited and routed to `not-answerable` pointing at Threshold. The HICP arithmetic itself is not built. See below |
+| 1.9 | Every branch returns a `Citation` with Act, section, subsection and a URL | **done.** Asserted for every outcome |
+| 1.10 | Audit trail: an ordered list of steps a human can check by hand | **done** |
+| 1.11 | `Unknown` as a first-class result when an input the tool cannot verify decides the answer | **done.** Carries both branches, each fully computed |
 
-**The hard part is 1.11.** The new-build carve-out turns on a commencement notice date
-the tenant cannot see. The engine must be able to return "the answer is X if the building
-commenced before 10 June 2025 and Y if after, and here is how to find out", rather than
-picking one.
+**The hard part was 1.11, and it worked.** Asking with `newBuildExemption: "unknown"`
+returns an `unknown` outcome carrying two fully computed branches, EUR 2,069.84 and
+EUR 2,050.00 on the worked example, plus the question that separates them and how to put it
+to a landlord.
+
+### What Sprint 1 did not finish
+
+**1.8 is partly done and the gap is deliberate.** A notice served before 1 March 2026 is
+correctly detected, cited to section 19(6) and routed to a `not-answerable` result that
+sends the person to Threshold. The pre-2026 HICP arithmetic behind it is not implemented.
+Building it properly needs the HICP series, which is a different CSO table with a different
+base, and the RPZ geography rules for settings before 20 June 2025. Answering that badly is
+worse than saying plainly that we do not cover it, so the engine says so. It is now a
+Sprint 3 task.
+
+**Purity is asserted, not claimed.** `packages/rules/tests/purity.test.ts` strips comments
+from every source file and fails the build on `new Date`, `Math.random`, `fetch`,
+`process`, `node:`, browser globals or `console`. The privacy and reproducibility claims in
+the README rest on that, so it is a test rather than a convention.
+
+90 tests. Requirements in `docs/03-requirements.md` have IDs and the tests name them, so
+`grep -r R-CPI-05 packages/` finds what defends the asymmetry.
 
 ---
 
@@ -137,6 +155,7 @@ calculator and we are right, that is a finding and it goes in the README.
 
 | # | Task | Status |
 |---|---|---|
+| 3.0 | Carried from Sprint 1: the pre-2026 HICP regime behind section 19(6). Needs the CSO HICP series and the RPZ geography rules for settings before 20 June 2025 | todo |
 | 3.1 | `packages/rules/notice`: `NoticeQuery` and `Defect` types, each defect citing a rule | todo |
 | 3.2 | 90 day rule, counted from service to the date the new rent takes effect | todo |
 | 3.3 | Same-day RTB filing rule, only for notices served on or after 1 March 2026 | todo |
