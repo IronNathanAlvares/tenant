@@ -8,6 +8,40 @@
  * See docs/adr/ADR-0005-typescript-and-a-pure-engine.md.
  */
 
+export { CITATIONS, type Citation, type CitationKey } from "./citations";
+export {
+  type CpiBasis,
+  type CpiReading,
+  type CpiSnapshot,
+  cpiChangePercent,
+  currentCpiNumber,
+  lookupCpi,
+  NATIONAL_RENT_CONTROL_START,
+  NEW_BUILD_EXEMPTION_START,
+  previousCpiNumber,
+} from "./cpi";
+export {
+  addMonths,
+  addYears,
+  compareDates,
+  compareMonths,
+  daysBetween,
+  daysInMonth,
+  formatDate,
+  formatMonth,
+  isLeapYear,
+  monthLabel,
+  monthOf,
+  type PlainDate,
+  type PlainMonth,
+  parseDate,
+  parseMonth,
+  previousMonth,
+  toDayNumber,
+  wholeMonthsBetween,
+  yearsAndRemainder,
+} from "./dates";
+export { evaluateRent, RULES_VERSION } from "./evaluate";
 export {
   addCents,
   type Cents,
@@ -17,6 +51,23 @@ export {
   parseEuro,
   subtractCents,
 } from "./money";
-
-/** Bumped whenever the encoded rules change, and recorded on every determination. */
-export const RULES_VERSION = "0.0.0-scaffold";
+export {
+  describeRegime,
+  isBeforeCommencement,
+  percentageCapApplies,
+  type Regime,
+  resolveRegime,
+} from "./regime";
+export {
+  type AuditStep,
+  assertNever,
+  type Calculation,
+  type Constraint,
+  type Determination,
+  type NewBuildExemption,
+  type NoCapReason,
+  type Outcome,
+  type Provenance,
+  type RentQuery,
+  type TenancyKind,
+} from "./types";
