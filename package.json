@@ -13,13 +13,15 @@
     "test": "vitest run",
     "build": "pnpm --filter @tenant/web build",
     "cpi:build": "python scripts/build_cpi_snapshot.py",
-    "verify": "pnpm lint && pnpm typecheck && pnpm test"
+    "verify": "pnpm lint && pnpm typecheck && pnpm test",
+    "oracle:verify": "node scripts/verify_oracle.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
+    "fast-check": "^3.23.0",
+    "jsdom": "^30.0.1",
     "typescript": "^5.7.0",
-    "vitest": "^3.0.0",
-    "fast-check": "^3.23.0"
+    "vitest": "^3.0.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

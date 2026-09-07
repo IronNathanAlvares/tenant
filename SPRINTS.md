@@ -134,13 +134,36 @@ rounding and day-count conventions settled by evidence rather than guess.
 | # | Task | Status |
 |---|---|---|
 | 2.1 | ~~Work out whether the RTB calculator is drivable~~ **Done in Sprint 0.** It is client-side JS and was read directly | done |
-| 2.2 | Port the RTB algorithm as a **reference oracle** in the test suite, from `measurements/01`, kept separate from our engine | todo |
-| 2.3 | Randomised differential testing of our engine against the oracle, large N | todo |
-| 2.4 | Drive the real form on a small stratified sample to prove the oracle is faithful. This is the step that keeps the whole thing honest | todo |
-| 2.5 | Golden vector file in `data/vectors` with provenance per row, and the published match rate | todo |
-| 2.6 | Carried from Sprint 0: review righttenantry.ie, propdesk.ie, tenantsync.ie properly | todo |
-| 2.7 | Property tests with fast-check: monotonic in old rent, never exceeds either cap, stable under date reordering | todo |
-| 2.8 | Write `docs/measurements/02-engine-agreement.md`, including every case we do not match and why | todo |
+| 2.2 | Port the RTB algorithm as a **reference oracle**, kept separate from our engine | **done.** `packages/rules/tests/rtb-oracle.ts` |
+| 2.3 | Differential testing of our engine against the oracle | **done.** 2,720 cases, 100% agreement to the cent |
+| 2.4 | Prove the oracle is faithful | **done, and better than planned.** `scripts/verify_oracle.mjs` runs the RTB's actual `rent-calc.js` under jsdom over 2,240 cases. Zero mismatches |
+| 2.5 | Golden vectors in `data/vectors` with provenance, and the published match rate | **done.** `oracle-cases.json`, `agreement-summary.json`, `oracle-fidelity.json` |
+| 2.6 | Carried from Sprint 0: review righttenantry.ie, propdesk.ie, tenantsync.ie properly | **not done.** Carried again to Sprint 3 |
+| 2.7 | Property tests with fast-check | **done in Sprint 1.** Monotonicity, never exceeding either cap, never throwing |
+| 2.8 | Write `docs/measurements/02-engine-agreement.md` | **done** |
+
+### What Sprint 2 found
+
+**The headline: 2,720 of 2,720, exact to the cent.** That number is only worth something
+because the harness demonstrably detects differences, which is why the statutory basis runs
+through the same comparison as a control and is flagged in 1,484 cases. A test asserts the
+control stays non-zero.
+
+**The measurement contradicted ADR-0006.** The ADR asserted the two readings of section
+19(4) differ by cents. They differ in 54.6 per cent of cases, with a median gap of 4.05
+euro a month and a maximum of 173.36, and the gap runs both ways: in 630 cases the official
+calculator permits **more** than a strict reading of the Act allows. ADR-0006 now carries a
+dated correction. The decision stands, the presentation changes, and that becomes a Sprint 4
+interface requirement.
+
+**Task 2.4 came out better than planned.** Instead of typing a handful of cases into the
+form, `scripts/verify_oracle.mjs` downloads the RTB's actual `rent-calc.js`, runs it under
+jsdom, and compares 2,240 cases against the transcription. Zero mismatches, against a file
+whose hash matches the one transcribed from.
+
+Its first run reported 161 mismatches, and the cause was my harness rather than the oracle:
+the two sides were using different CPI data. Recorded in `measurements/02` §7, because that
+is the failure mode this kind of comparison is most prone to.
 
 **Report the failures.** A match rate of 100 per cent on 12 easy cases is worth less than
 97 per cent on 400 with the three failures explained. If we disagree with the RTB
@@ -156,6 +179,7 @@ calculator and we are right, that is a finding and it goes in the README.
 | # | Task | Status |
 |---|---|---|
 | 3.0 | Carried from Sprint 1: the pre-2026 HICP regime behind section 19(6). Needs the CSO HICP series and the RPZ geography rules for settings before 20 June 2025 | todo |
+| 3.0b | Carried from Sprint 0 and 2: review righttenantry.ie, propdesk.ie, tenantsync.ie properly | todo |
 | 3.1 | `packages/rules/notice`: `NoticeQuery` and `Defect` types, each defect citing a rule | todo |
 | 3.2 | 90 day rule, counted from service to the date the new rent takes effect | todo |
 | 3.3 | Same-day RTB filing rule, only for notices served on or after 1 March 2026 | todo |

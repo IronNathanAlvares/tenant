@@ -16,7 +16,7 @@ See [`SPRINTS.md`](SPRINTS.md) for what happens next.
 |---|---|---|
 | **S0** | Foundations, remaining research, repo, CI | **Complete.** CI green, deploy path proven, and it found something (below) |
 | S1 | The dated rules engine | **Complete.** 90 tests. One gap left open on purpose, below |
-| S2 | Ground truth against the official RTB calculator | Not started |
+| S2 | Ground truth against the official RTB calculator | **Complete.** 2,720 of 2,720, exact. And it disproved one of my own ADRs |
 | S3 | Notice validity | Not started |
 | S4 | Web app v1, live | Not started |
 | S5 | Explanation layer and dispute pack | Not started |
@@ -131,6 +131,33 @@ evaluateRent({ ...query, newBuildExemption: "unknown" }, CPI_SNAPSHOT);
 A rent review notice served before 1 March 2026 is detected, cited to section 19(6) and
 refused rather than answered, because the pre-2026 HICP arithmetic is not built yet. Saying
 so is better than guessing at it.
+
+## The measurement
+
+The engine agrees with the RTB's algorithm on **2,720 of 2,720 cases, exactly, to the
+cent**, on both the maximum rent and the maximum increase.
+
+That zero only means something if the harness could detect a difference, so the engine's
+statutory basis runs through the identical comparison as a control and is flagged in 1,484
+cases. A test asserts the control stays non-zero.
+
+The transcription itself is checked against the real thing. `pnpm oracle:verify` downloads
+the RTB's actual `rent-calc.js`, runs it under jsdom over 2,240 cases and compares:
+
+```
+Compared 2240 cases against the live script.
+The oracle reproduces the RTB calculator exactly.
+```
+
+**And the measurement disproved one of my own decision records.** ADR-0006 claimed the two
+readings of section 19(4) differ by cents. They differ in 54.6 per cent of cases, median
+4.05 euro a month, maximum 173.36. Only 62 of 1,484 differing cases are within five cent.
+
+The gap runs both ways. In **630 cases the official RTB calculator permits more than a
+strict reading of the Act allows**, which means a landlord using the regulator's own tool
+correctly can still end up above the statutory cap. The ADR carries a dated correction
+rather than a quiet edit. Full working in
+[`docs/measurements/02`](docs/measurements/02-engine-agreement.md).
 
 ## The architecture, in one paragraph
 

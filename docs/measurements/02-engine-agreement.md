@@ -124,14 +124,52 @@ testing one path:
 | New-build exempt (CPI only) | 1,360 |
 | Zero lawful increase | 1,068 |
 
-## 7. What has not been done
+## 7. The oracle is faithful, checked against the RTB's own code
 
-**The oracle has not yet been validated against the live form.** It is a faithful
-transcription of source I read, and it reproduces the documented worked example, but nobody
-has typed those inputs into rtb.ie and checked the output matches. Until that happens this
-measures agreement with *my reading of* the RTB calculator, not with the calculator.
+Everything above rests on the transcription being accurate, and a transcription I checked
+myself is not evidence. So rather than typing cases into the form by hand, the RTB's actual
+`rent-calc.js` is executed and compared against the oracle directly.
 
-That is task 2.4 and it is the step that makes the rest honest. It is outstanding.
+`scripts/verify_oracle.mjs` downloads the live script, runs it under jsdom against a minimal
+form carrying the element ids the real page uses, feeds it the same pinned CPI snapshot the
+engine uses, and drives its submit handler over a 2,240 case grid.
+
+```
+$ node scripts/verify_oracle.mjs
+Fetching https://rtb.ie/wp-content/themes/rtb/assets/rent-calc/Scripts/rent-calc.js
+sha256 1f7a50b86efaba3197232cce6a3d8f86b3f08a651d3a8e6673b6bf83b01432d7
+
+Compared 2240 cases against the live script.
+The oracle reproduces the RTB calculator exactly.
+```
+
+The hash matches the file the transcription was made from, so this is a comparison against
+the same code, not a later revision. The script reports loudly when the hash changes.
+
+It is a script rather than a CI test on purpose: it needs the network, and it executes the
+RTB's copyrighted code, which is fine to fetch and run locally but is not vendored into
+this MIT repository.
+
+### The first run failed, and the failure was mine
+
+161 of 2,240 cases mismatched initially. Every one was a case where the oracle returned no
+increase and the RTB returned a real one, and all of them had the new-build flag set.
+
+The cause was not the transcription. The case dump was using the trimmed 22 month test
+fixture while the script fed the RTB the full 357 month snapshot. The fixture has gaps in
+2024, so the oracle's CPI walk-back landed on a month the RTB's never would, and the
+comparison was measuring a difference in **inputs** rather than in algorithms.
+
+Fixed by having both sides read the same snapshot from disk. Worth recording because it is
+the failure mode this kind of harness is most prone to: two implementations agreeing or
+disagreeing for reasons that have nothing to do with either implementation.
+
+## 8. What has not been done
 
 **The three remaining competitor calculators** (righttenantry.ie, propdesk.ie,
-tenantsync.ie) have still not been reviewed properly. Carried again.
+tenantsync.ie) have still not been reviewed properly. Carried to Sprint 3.
+
+**Nothing has been typed into the live form by a human.** The jsdom harness runs the real
+code, which is stronger than manual entry for coverage, but it does not prove the page
+wires that code to the form the way I assume. One manual spot check would close that, and
+it is worth doing before the site launches.
