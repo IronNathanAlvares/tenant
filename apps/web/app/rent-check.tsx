@@ -5,14 +5,17 @@ import {
   buildPack,
   type Calculation,
   type Cents,
+  compareDates,
   type Determination,
   evaluateRent,
   formatEuroDisplay,
+  NATIONAL_RENT_CONTROL_START,
   type NewBuildExemption,
   parseDate,
   parseEuro,
   type RentQuery,
   type TenancyKind,
+  WHOLE_STATE_DEEMED_RPZ,
 } from "@tenant/rules";
 import { useMemo, useState } from "react";
 import {
@@ -56,8 +59,10 @@ type FormState = {
   previousSetting: string;
   newSetting: string;
   proposedRent: string;
+  noticeServed: string;
   tenancyKind: TenancyKind;
   newBuildExemption: NewBuildExemption;
+  inRentPressureZone: NewBuildExemption;
 };
 
 const EMPTY: FormState = {
@@ -65,8 +70,11 @@ const EMPTY: FormState = {
   previousSetting: "",
   newSetting: "",
   proposedRent: "",
+  noticeServed: "",
   tenancyKind: "private",
   newBuildExemption: "no",
+  // Only ever consulted on the pre-2026 path, and only for rent set before 20 June 2025.
+  inRentPressureZone: "unknown",
 };
 
 function tryParseEuro(value: string): Cents | null {
@@ -98,14 +106,19 @@ export function RentCheck() {
       return null;
     }
     const proposedRent = tryParseEuro(form.proposedRent);
+    const noticeServed = tryParseDate(form.noticeServed);
     return {
       tenancyKind: form.tenancyKind,
       previousRent,
       previousSetting,
       newSetting,
       newBuildExemption: form.newBuildExemption,
+      inRentPressureZone: form.inRentPressureZone,
       asOf: newSetting,
       ...(proposedRent !== null ? { proposedRent } : {}),
+      // Sends the whole question down the section 19(6) path when it is before
+      // 1 March 2026, because the repealed regime still governs those notices.
+      ...(noticeServed !== null ? { noticeServed } : {}),
     };
   }, [form]);
 
@@ -113,6 +126,16 @@ export function RentCheck() {
     () => (query === null ? null : evaluateRent(query, CPI_SNAPSHOT, HICP_SNAPSHOT)),
     [query],
   );
+
+  // The old regime only applied inside a designated Rent Pressure Zone, and only for rent
+  // set before the whole State was deemed to be one. Asking otherwise is noise.
+  const noticeDate = tryParseDate(form.noticeServed);
+  const newSettingDate = tryParseDate(form.newSetting);
+  const zoneQuestionMatters =
+    noticeDate !== null &&
+    compareDates(noticeDate, NATIONAL_RENT_CONTROL_START) < 0 &&
+    newSettingDate !== null &&
+    compareDates(newSettingDate, WHOLE_STATE_DEEMED_RPZ) < 0;
 
   const rentError =
     form.previousRent !== "" && tryParseEuro(form.previousRent) === null
@@ -178,6 +201,29 @@ export function RentCheck() {
             value={form.proposedRent}
             onValueChange={(value) => set("proposedRent", value)}
           />
+
+          <DateField
+            id="notice-served"
+            label="When were you given the rent review notice?"
+            hint="Only matters if it was before 1 March 2026. Notices served before then are still governed by the older rules, which used a different inflation measure. Leave blank if there was no notice or it was recent."
+            value={form.noticeServed}
+            onValueChange={(value) => set("noticeServed", value)}
+          />
+
+          {zoneQuestionMatters && (
+            <Choices
+              name="rpz"
+              legend="Was your home in a Rent Pressure Zone at the time?"
+              hint="Before 20 June 2025 the rent cap only applied inside a designated zone. From that date the whole country counts as one, so this only matters for rent set earlier. The RTB have a checker on rtb.ie."
+              value={form.inRentPressureZone}
+              onChange={(value) => set("inRentPressureZone", value)}
+              options={[
+                { value: "yes", label: "Yes" },
+                { value: "no", label: "No" },
+                { value: "unknown", label: "I don't know" },
+              ]}
+            />
+          )}
 
           <Choices
             name="tenancy-kind"

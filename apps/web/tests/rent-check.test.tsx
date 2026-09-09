@@ -219,6 +219,61 @@ describe("when the answer honestly depends on something the tenant cannot check"
   });
 });
 
+describe("the pre-2026 regime is reachable from the form", () => {
+  // The engine gained the section 19(6) path before the form had any way to reach it, so
+  // every one of these is a regression test against building a regime nobody can get to.
+  it("asks when the notice was served", () => {
+    render(<RentCheck />);
+    openOptionalSections();
+    expect(screen.getByLabelText(/when were you given the rent review notice/i)).toBeDefined();
+  });
+
+  it("routes a notice served before 1 March 2026 to the older rules", async () => {
+    render(<RentCheck />);
+    const user = await fillWorkedExample();
+    openOptionalSections();
+    await user.type(
+      screen.getByLabelText(/when were you given the rent review notice/i),
+      "2026-01-15",
+    );
+
+    // HICP data to 2026-07, so a real figure comes back rather than a refusal.
+    expect(screen.queryByText(/this tool cannot answer/i)).toBeNull();
+    expect(document.querySelector(".figure")).not.toBeNull();
+  });
+
+  it("only asks the Rent Pressure Zone question when it actually matters", async () => {
+    render(<RentCheck />);
+    const user = await fillWorkedExample();
+    openOptionalSections();
+
+    // New rent set in September 2026, after the whole State was deemed a zone.
+    await user.type(
+      screen.getByLabelText(/when were you given the rent review notice/i),
+      "2026-01-15",
+    );
+    expect(screen.queryByRole("group", { name: /Rent Pressure Zone/i })).toBeNull();
+  });
+
+  it("asks it for a setting before 20 June 2025", async () => {
+    render(<RentCheck />);
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText(/what rent are you paying now/i), "1500");
+    await user.type(screen.getByLabelText(/when was that rent last set/i), "2023-06-01");
+    await user.type(screen.getByLabelText(/when does the new rent start/i), "2024-12-01");
+    openOptionalSections();
+    await user.type(
+      screen.getByLabelText(/when were you given the rent review notice/i),
+      "2024-08-01",
+    );
+
+    const zone = screen.getByRole("group", { name: /Rent Pressure Zone/i });
+    expect(zone).toBeDefined();
+    // Unanswered, so it must offer both branches rather than assume one.
+    expect(screen.getByText(/turns on a question only your landlord can answer/i)).toBeDefined();
+  });
+});
+
 describe("regimes outside rent control", () => {
   it("does not invent a cap for a cost rental tenancy", async () => {
     render(<RentCheck />);

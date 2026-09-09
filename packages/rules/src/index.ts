@@ -15,10 +15,14 @@ export {
   type CpiSnapshot,
   cpiChangePercent,
   currentCpiNumber,
+  HICP_REGIME_START,
   lookupCpi,
   NATIONAL_RENT_CONTROL_START,
   NEW_BUILD_EXEMPTION_START,
   previousCpiNumber,
+  previousHicpNumber,
+  previousIndexNumber,
+  WHOLE_STATE_DEEMED_RPZ,
 } from "./cpi";
 export {
   addMonths,

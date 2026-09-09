@@ -7,7 +7,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "typecheck": "tsc --build --force",
+    "typecheck": "tsc --build --force && tsc --noEmit -p apps/web",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "test": "vitest run",
