@@ -178,7 +178,7 @@ calculator and we are right, that is a finding and it goes in the README.
 
 | # | Task | Status |
 |---|---|---|
-| 3.0 | Carried from Sprint 1: the pre-2026 HICP regime behind section 19(6) | **investigated, deliberately not built.** Structure confirmed identical to the current one, data located (CSO CPM23). Blocked on confirming which HICP series was operative. Doc 01 §11 |
+| 3.0 | Carried from Sprint 1: the pre-2026 HICP regime behind section 19(6) | **done, after Sprint 7.** The blocker was confirming the operative series. Section 6 of the Residential Tenancies (No. 2) Act 2021 defines it as CPM23C01/CP00. 16 tests. Doc 01 §11 |
 | 3.0b | Carried from Sprint 0 and 2: review righttenantry.ie, propdesk.ie, tenantsync.ie properly | **done.** Doc 01 §7a. One of them is now actively wrong |
 | 3.1 | `packages/rules/notice`: `NoticeQuery` and `Defect` types, each defect citing a rule | **done** |
 | 3.2 | 90 day rule, counted from service to the date the new rent takes effect | **done** |
@@ -430,3 +430,29 @@ both steps, so the cause is not visible from outside.
 **Genuinely open, and named rather than buried:** the pre-2026 HICP path, the contested
 section 20 review frequency, the commencement order, and the fact that nobody outside this
 project has used the site. All in `docs/12-reality-check.md`.
+
+---
+
+## After Sprint 7: closing the carried item
+
+The pre-2026 HICP path was carried from Sprint 1 through Sprints 3 and 5, each time with the
+same reason: the structure was known and the data located, but the statutory definition of
+"HICP value" had not been read, and picking a series would have been a guess in the one place
+a wrong answer is least recoverable.
+
+It is closed now, by reading section 6 of the Residential Tenancies (No. 2) Act 2021.
+
+Three things it needed beyond the data:
+
+**A second pivot date.** The same asymmetry exists in the 2021 wording, pivoting on the
+commencement of section 3 of the 2021 Amendment Act, **11 December 2021**. So it is the same
+function with a different pivot rather than a second implementation.
+
+**A geography question.** Before the 2025 Amendment Act deemed the whole State a rent
+pressure zone on 20 June 2025, the cap only applied inside one. For settings before that date
+the tool asks, and returns both branches if the answer is not given.
+
+**An honest degradation.** The HICP snapshot is an optional argument. Without it the engine
+keeps refusing rather than reaching for the CPI table, and a test asserts that.
+
+262 tests. Open question 9 is closed. Questions 7 and 8 are still open and still named.

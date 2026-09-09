@@ -128,9 +128,11 @@ evaluateRent({ ...query, newBuildExemption: "unknown" }, CPI_SNAPSHOT);
 //                commencement notice if the RTB investigates ..."
 ```
 
-A rent review notice served before 1 March 2026 is detected, cited to section 19(6) and
-refused rather than answered, because the pre-2026 HICP arithmetic is not built yet. Saying
-so is better than guessing at it.
+A rent review notice served before 1 March 2026 goes down a different path entirely, because
+section 19(6) keeps the repealed regime alive for it. That regime used HICP, pivots its
+asymmetry on 11 December 2021 rather than 1 March 2026, and before 20 June 2025 only applied
+inside a designated Rent Pressure Zone. All three are handled. It was left refusing for three
+sprints until the operative index series could be confirmed from the Act rather than guessed.
 
 ## The measurement
 
@@ -230,8 +232,8 @@ shipped it in this README, I wrote a decision record asserting a quantity before
 and the measurement contradicted it, a test passed for the wrong reason and hid a real bug in
 the form, and I inferred a deployment failure three times without the log and was wrong twice.
 
-Still open and named rather than buried: the pre-2026 HICP path is not built, one legal
-question needs a solicitor, and nobody outside this project has used the site.
+Still open and named rather than buried: one legal question needs a solicitor, the
+commencement order has not been found, and nobody outside this project has used the site.
 
 ## What it is not
 

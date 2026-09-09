@@ -25,6 +25,20 @@ export const NATIONAL_RENT_CONTROL_START: PlainDate = parseDate("2026-03-01");
 /** Building control commencement notices on or after this date may exempt a dwelling. */
 export const NEW_BUILD_EXEMPTION_START: PlainDate = parseDate("2025-06-10");
 
+/**
+ * Commencement of section 3 of the Residential Tenancies (Amendment) Act 2021, which is the
+ * pivot for the HICP version of the same asymmetry. The Act was signed on 11 December 2021
+ * and section 3 took effect from that date.
+ */
+export const HICP_REGIME_START: PlainDate = parseDate("2021-12-11");
+
+/**
+ * From this date the Residential Tenancies (Amendment) Act 2025 deemed every area of the
+ * State that was not already a rent pressure zone to be one. Before it, the pre-2026 cap
+ * only applied inside a designated zone, so geography mattered and we have to ask.
+ */
+export const WHOLE_STATE_DEEMED_RPZ: PlainDate = parseDate("2025-06-20");
+
 export interface CpiSnapshot {
   /** Content hash over the series, recorded on every determination. R-CPI-06. */
   readonly sha256: string;
@@ -112,13 +126,40 @@ export function previousCpiNumber(
   previousSetting: PlainDate,
   basis: CpiBasis,
 ): CpiReading | null {
+  return previousIndexNumber(snapshot, previousSetting, basis, NATIONAL_RENT_CONTROL_START);
+}
+
+/**
+ * The same asymmetry, one regime earlier.
+ *
+ * Section 19(4)(b) as inserted by section 3 of the Residential Tenancies (Amendment) Act 2021
+ * defined "previous HICP value" in exactly the shape the CPI definition now has, pivoting on
+ * that section's own commencement instead of on 1 March 2026. Same rule, different date, so
+ * it is the same function with a different pivot rather than a second implementation.
+ */
+export function previousHicpNumber(
+  snapshot: CpiSnapshot,
+  previousSetting: PlainDate,
+  basis: CpiBasis,
+): CpiReading | null {
+  return previousIndexNumber(snapshot, previousSetting, basis, HICP_REGIME_START);
+}
+
+/**
+ * The general form. Before the pivot, take the month the previous setting happened in.
+ * On or after it, take the month before.
+ */
+export function previousIndexNumber(
+  snapshot: CpiSnapshot,
+  previousSetting: PlainDate,
+  basis: CpiBasis,
+  pivot: PlainDate,
+): CpiReading | null {
   if (basis === "rtb") {
     return lookupCpi(snapshot, monthOf(previousSetting));
   }
-  const beforeCommencement = compareDates(previousSetting, NATIONAL_RENT_CONTROL_START) < 0;
-  const target = beforeCommencement
-    ? monthOf(previousSetting)
-    : previousMonth(monthOf(previousSetting));
+  const beforePivot = compareDates(previousSetting, pivot) < 0;
+  const target = beforePivot ? monthOf(previousSetting) : previousMonth(monthOf(previousSetting));
   return lookupCpi(snapshot, target);
 }
 

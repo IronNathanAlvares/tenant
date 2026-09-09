@@ -513,52 +513,44 @@ Five conclusions, each of which becomes a decision record.
 | 6 | Is the RTB calculator scriptable | **Closed, better than hoped** | The whole calculation is client-side JavaScript and readable. Sprint 2 changes shape accordingly |
 | 7 | Does the 24 month review frequency still bite for pre-1-March-2026 tenancies | **Open, and it matters** | My reading of section 20(4) to (6) with the new 20B(2) says yes until 20 June 2027. The RTB says 12 months except on the section 24C path. See §5b |
 | 8 | Which sections of the 2026 Act commenced on which day, per the commencement order | **Open** | Section 1(2) commences most of the Act by ministerial order. 1 March 2026 is universally reported but I have not found the S.I. itself |
-| 9 | Which HICP series was operative under the pre-2026 regime | **Open, blocks the section 19(6) path** | See §11 |
+| 9 | Which HICP series was operative under the pre-2026 regime | **Closed** | CPM23C01/CP00, defined by s. 6 of the Residential Tenancies (No. 2) Act 2021. See §11 |
 
 ---
 
-## 11. The pre-2026 HICP regime, and why it is not built yet
+## 11. The pre-2026 HICP regime, now built
 
 Section 19(6) keeps the repealed regime alive for any notice served before 1 March 2026, so
-this is live law, not history. The engine detects those notices, cites the provision and
-**refuses to answer**, pointing at Threshold. That is deliberate.
+this is live law, not history. It was deliberately left unbuilt through three sprints, with
+the engine detecting those notices, citing the provision and refusing to answer, because one
+thing could not be confirmed.
 
-Two of the three things needed are now known.
+**The structure.** Section 3 of the Residential Tenancies (Amendment) Act 2021 (No. 39 of
+2021) inserted the same two-constraint shape section 19(4) has now. "Previous HICP value"
+carries the same asymmetry, pivoting on that section's own commencement rather than on
+1 March 2026.
 
-**The structure is identical.** Section 3 of the Residential Tenancies (Amendment) Act 2021
-(No. 39 of 2021) inserted the same two-constraint shape the current section 19(4) has: a
-relevant percentage cap, and a cap on the ratio of new rent to old rent at the ratio of the
-current index value to the previous. The definition of "previous HICP value" carries the
-same asymmetry, pivoting on the commencement of section 3 of that Act rather than on
-1 March 2026. So when this is built it is the existing code with different parameters, not
-a second implementation.
+**The pivot date. 11 December 2021**, the day the 2021 Amendment Act was signed and section
+3 took effect.
 
-**The data exists.** CSO PxStat table **CPM23**, "EU Harmonised Index of Consumer Prices",
-statistic `CPM23C01`, sub index `CP00` (All Items), 357 months to July 2026, same shape as
-CPM24.
+**The series, which was the blocker, and is now confirmed.** Section 6 of the Residential
+Tenancies (No. 2) Act 2021 (No. 17 of 2021) defines it:
 
-**What is missing is the one that matters.** The statutory definition of "HICP value" is
-not in section 3 of the 2021 Act and was substituted out of section 19(7) by the 2026 Act,
-so it is not in the current consolidated text either. Until it is read from the Act that
-introduced it, choosing `CPM23C01`/`CP00` would be an assumption, and section 19(4C) points
-at the table the **Board** published rather than at a CSO series directly, exactly as it now
-does for CPI.
+> "HICP values" means the values contained in the most recent data available monthly in the
+> All-Items Harmonised Index of Consumer Prices in relation to Ireland and published monthly
+> by the Central Statistics Office in accordance with Regulation (EU) 2016/792
 
-Guessing here is worse than in any other part of the project. These notices were served
-months ago, the rents already changed, and a tenant acting on a wrong figure has usually
-already missed the section 22(3) deadline by the time anyone notices. Refusing is the
-correct behaviour until the series is confirmed.
+That is CSO PxStat table **CPM23**, statistic **CPM23C01**, sub index **CP00**. 357 months
+to July 2026, pinned and hashed at `data/cpi/hicp-all-items.json`.
 
-**To close it:** read section 19(7) as it stood before the 2026 Act, most likely from the
-Residential Tenancies (No. 2) Act 2021 (No. 17 of 2021) or the 2021 Amendment Act as
-enacted, and find the RTB's archived HICP table to confirm the values match.
+**One extra question this regime needs.** Before the 2025 Amendment Act the cap applied only
+"in a rent pressure zone", so geography decided it. That Act deemed every area of the State
+to be a zone from **20 June 2025**. So:
 
-Questions 4, 5 and 6 were expected to be Sprint 2 work resolved by black-box probing. They
-were closed in Sprint 0 instead by reading the official implementation, which also turned
-up two divergences between that implementation and the statute. That is the most
-interesting finding in the project so far and it is written up in
-[`measurements/01`](measurements/01-rtb-calculator-algorithm.md).
+- New rent set on or after 20 June 2025: the whole State counts, and the tool does not ask
+- Before that: the tool asks, and returns `unknown` with both branches if the answer is not
+  given, the same pattern as the new-build question
 
-Question 7 is the one that most needs a second opinion from someone who practises in this
-area. Question 8 is housekeeping but it needs doing before the dated rules engine can
-claim its commencement dates are sourced rather than assumed.
+**What the engine does now.** Given the HICP snapshot it computes. Given only the CPI
+snapshot it still refuses rather than reaching for the wrong table, which is asserted by a
+test. That fallback matters: these notices were served months ago, the rents already changed,
+and a wrong figure is usually unrecoverable by the time anyone notices.

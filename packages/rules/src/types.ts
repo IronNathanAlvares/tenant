@@ -43,6 +43,14 @@ export interface RentQuery {
   readonly noticeServed?: PlainDate;
   readonly newBuildExemption: NewBuildExemption;
   /**
+   * Whether the dwelling was in a designated rent pressure zone.
+   *
+   * Only ever asked about the pre-2026 regime, and only for settings before 20 June 2025.
+   * The Residential Tenancies (Amendment) Act 2025 deemed the whole State to be a zone from
+   * that date, so after it the question answers itself.
+   */
+  readonly inRentPressureZone?: NewBuildExemption;
+  /**
    * True where the landlord is entitled to set market rent under s. 19(5), for example at
    * the end of a six year tenancy of minimum duration or after a two year vacancy.
    */

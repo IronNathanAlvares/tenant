@@ -21,12 +21,16 @@ import {
   type CpiSnapshot,
   cpiChangePercent,
   currentCpiNumber,
-  previousCpiNumber,
+  HICP_REGIME_START,
+  NATIONAL_RENT_CONTROL_START,
+  previousIndexNumber,
+  WHOLE_STATE_DEEMED_RPZ,
 } from "./cpi";
 import {
   compareDates,
   formatDate,
   monthLabel,
+  type PlainDate,
   wholeMonthsBetween,
   yearsAndRemainder,
 } from "./dates";
@@ -128,8 +132,14 @@ function calculate(
   snapshot: CpiSnapshot,
   basis: CpiBasis,
   applyPercentageCap: boolean,
+  /**
+   * The date the "previous index number" definition pivots on. 1 March 2026 for CPI, and
+   * the commencement of section 3 of the 2021 Amendment Act for HICP. Same rule, and the
+   * pre-2026 regime is therefore the same code with a different pivot and a different table.
+   */
+  pivot: PlainDate = NATIONAL_RENT_CONTROL_START,
 ): Calculation {
-  const previousCpi = previousCpiNumber(snapshot, query.previousSetting, basis);
+  const previousCpi = previousIndexNumber(snapshot, query.previousSetting, basis, pivot);
   const currentCpi = currentCpiNumber(snapshot, query.newSetting, basis);
 
   const pctCap = applyPercentageCap ? percentageCap(query, basis) : null;
@@ -276,7 +286,19 @@ function collectCitations(steps: readonly AuditStep[], extra: readonly Citation[
  * Never throws for a well-formed query. Problems come back as a `not-answerable`
  * determination so a caller cannot forget to handle them. R-OUT-06.
  */
-export function evaluateRent(query: RentQuery, snapshot: CpiSnapshot): Determination {
+export function evaluateRent(
+  query: RentQuery,
+  snapshot: CpiSnapshot,
+  /**
+   * The HICP series, needed only for the section 19(6) path: notices served before
+   * 1 March 2026 are still governed by the repealed regime, which used HICP.
+   *
+   * Optional, and the engine degrades honestly without it. Given no HICP snapshot it keeps
+   * refusing those cases rather than reaching for the CPI table, which would be a
+   * confidently wrong answer in the one place a wrong answer is least recoverable.
+   */
+  hicpSnapshot?: CpiSnapshot,
+): Determination {
   const provenance = provenanceOf(snapshot);
 
   if (compareDates(query.newSetting, query.previousSetting) <= 0) {
@@ -330,22 +352,96 @@ export function evaluateRent(query: RentQuery, snapshot: CpiSnapshot): Determina
         provenance,
       );
 
-    case "pre-2026-notice":
+    case "pre-2026-notice": {
+      if (hicpSnapshot === undefined) {
+        return {
+          outcome: "not-answerable",
+          problem: "This notice is governed by the rules that applied before 1 March 2026",
+          detail:
+            "Section 19(6) keeps the previous regime alive for any rent review notice served before 1 March 2026, and that regime used HICP rather than CPI. This copy of the calculator was not given the HICP figures. Contact Threshold on 1800 454 454.",
+          audit: [
+            {
+              label: "Which rules apply",
+              detail: describeRegime(regime),
+              citation: regime.citation,
+            },
+          ],
+          citations: [regime.citation],
+          provenance,
+        };
+      }
+
+      // Before 20 June 2025 the cap only applied inside a designated rent pressure zone, so
+      // geography decides the answer and the tenant may not know it. After that date the
+      // 2025 Act deemed the whole State to be a zone, and the question answers itself.
+      const zoneMatters = compareDates(query.newSetting, WHOLE_STATE_DEEMED_RPZ) < 0;
+      const zoneAnswer = zoneMatters ? (query.inRentPressureZone ?? "unknown") : "yes";
+
+      if (zoneAnswer === "no") {
+        return noCap(
+          "market-rent-path",
+          "Before 20 June 2025 the rent cap only applied inside a designated Rent Pressure Zone. On what you have told us this dwelling was not in one at the time, so no percentage or index cap applied to this increase. The rent still could not be set above market rent.",
+          CITATIONS.marketRentProhibition,
+          provenance,
+        );
+      }
+
+      if (zoneAnswer === "unknown") {
+        const audit: AuditStep[] = [
+          { label: "Which rules apply", detail: describeRegime(regime), citation: regime.citation },
+        ];
+        return {
+          outcome: "unknown",
+          question:
+            "Was your home in a designated Rent Pressure Zone when this rent was set? Before 20 June 2025 the cap only applied inside one.",
+          howToFindOut:
+            "The RTB publish a checker on rtb.ie that tells you when an area became a Rent Pressure Zone. From 20 June 2025 the whole State counts as one, so this only matters for rent set before that date.",
+          branches: [
+            {
+              answer: "Yes, it was in a zone. The cap applied.",
+              determination: evaluateRent(
+                { ...query, inRentPressureZone: "yes" },
+                snapshot,
+                hicpSnapshot,
+              ),
+            },
+            {
+              answer: "No, it was not. No cap applied.",
+              determination: evaluateRent(
+                { ...query, inRentPressureZone: "no" },
+                snapshot,
+                hicpSnapshot,
+              ),
+            },
+          ],
+          audit,
+          citations: collectCitations(audit, [regime.citation, CITATIONS.marketRentProhibition]),
+          provenance,
+        };
+      }
+
+      // Same two constraints, same asymmetry, different index table and a different pivot.
+      const headline = calculate(query, hicpSnapshot, "rtb", true, HICP_REGIME_START);
+      const statutory = calculate(query, hicpSnapshot, "statute", true, HICP_REGIME_START);
+      const audit = auditFor(query, regime, headline, statutory);
+      const proposedIsLawful =
+        query.proposedRent === undefined ? null : query.proposedRent <= headline.maxRent;
+
       return {
-        outcome: "not-answerable",
-        problem: "This notice is governed by the rules that applied before 1 March 2026",
-        detail:
-          "Section 19(6) keeps the previous regime alive for any rent review notice served before 1 March 2026, and that regime used HICP rather than CPI. This calculator does not yet cover it. Contact Threshold on 1800 454 454.",
-        audit: [
-          {
-            label: "Which rules apply",
-            detail: describeRegime(regime),
-            citation: regime.citation,
-          },
-        ],
-        citations: [regime.citation],
-        provenance,
+        outcome: "capped",
+        headline,
+        statutory,
+        basesAgree: headline.maxRent === statutory.maxRent,
+        proposedIsLawful,
+        audit,
+        citations: collectCitations(audit, [regime.citation, CITATIONS.marketRentProhibition]),
+        provenance: {
+          ...provenance,
+          cpiSnapshotSha256: hicpSnapshot.sha256,
+          cpiLatestMonth: hicpSnapshot.latestMonth,
+        },
       };
+    }
 
     case "undetermined-new-build": {
       // The answer turns on a building control commencement notice date the tenant cannot
@@ -368,11 +464,11 @@ export function evaluateRent(query: RentQuery, snapshot: CpiSnapshot): Determina
         branches: [
           {
             answer: "Yes, it qualifies. Only the CPI cap applies.",
-            determination: evaluateRent(exemptQuery, snapshot),
+            determination: evaluateRent(exemptQuery, snapshot, hicpSnapshot),
           },
           {
             answer: "No, it does not qualify. Both caps apply.",
-            determination: evaluateRent(notExemptQuery, snapshot),
+            determination: evaluateRent(notExemptQuery, snapshot, hicpSnapshot),
           },
         ],
         audit,

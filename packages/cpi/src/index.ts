@@ -15,6 +15,36 @@
 
 import type { CpiSnapshot } from "@tenant/rules";
 import raw from "../../../data/cpi/cpi-all-items.json";
+import hicpRaw from "../../../data/cpi/hicp-all-items.json";
+
+/**
+ * The shape the generator writes.
+ *
+ * Declared structurally rather than as `typeof raw`, because inferring it from one of the
+ * two JSON files pins literal types that the other does not match. `fetched_at` is null in a
+ * snapshot rebuilt from a saved response and a string in one fetched live, and the compiler
+ * was right to complain about that.
+ */
+interface RawSnapshot {
+  readonly schema: number;
+  readonly sha256: string;
+  readonly base: string;
+  readonly latest_month: string;
+  readonly count: number;
+  readonly series: readonly { readonly month: string; readonly value: number }[];
+  readonly provenance: {
+    readonly source: string;
+    readonly table: string;
+    readonly statistic: string;
+    readonly statistic_label: string;
+    readonly sub_index: string;
+    readonly sub_index_label: string;
+    readonly url: string;
+    readonly dataset_updated: string;
+    readonly fetched_at: string | null;
+    readonly why_this_series: string;
+  };
+}
 
 export interface CpiProvenance {
   readonly source: string;
@@ -33,7 +63,7 @@ export interface CpiProvenance {
  * someone hand-edits the JSON or the generator changes shape, which is exactly when a
  * silent wrong answer would be most expensive.
  */
-function validate(input: typeof raw): CpiSnapshot {
+function validate(input: RawSnapshot): CpiSnapshot {
   if (typeof input.sha256 !== "string" || input.sha256.length === 0) {
     throw new Error("CPI snapshot has no sha256");
   }
@@ -72,15 +102,30 @@ function validate(input: typeof raw): CpiSnapshot {
   };
 }
 
-/** The pinned snapshot. Pass this to `evaluateRent`. */
+/** The pinned CPI snapshot. Pass this to `evaluateRent`. */
 export const CPI_SNAPSHOT: CpiSnapshot = validate(raw);
 
-export const CPI_PROVENANCE: CpiProvenance = {
-  source: raw.provenance.source,
-  table: raw.provenance.table,
-  statistic: raw.provenance.statistic,
-  subIndex: raw.provenance.sub_index,
-  url: raw.provenance.url,
-  datasetUpdated: raw.provenance.dataset_updated,
-  whyThisSeries: raw.provenance.why_this_series,
-};
+/**
+ * The pinned HICP snapshot, for the pre-2026 regime.
+ *
+ * Section 19(6) keeps that regime alive for any rent review notice served before
+ * 1 March 2026, and it used HICP rather than CPI. Section 6 of the Residential Tenancies
+ * (No. 2) Act 2021 defines HICP values as the All-Items Harmonised Index of Consumer Prices
+ * for Ireland published by the CSO under Regulation (EU) 2016/792, which is CPM23C01/CP00.
+ */
+export const HICP_SNAPSHOT: CpiSnapshot = validate(hicpRaw);
+
+function provenanceOf(input: RawSnapshot): CpiProvenance {
+  return {
+    source: input.provenance.source,
+    table: input.provenance.table,
+    statistic: input.provenance.statistic,
+    subIndex: input.provenance.sub_index,
+    url: input.provenance.url,
+    datasetUpdated: input.provenance.dataset_updated,
+    whyThisSeries: input.provenance.why_this_series,
+  };
+}
+
+export const CPI_PROVENANCE: CpiProvenance = provenanceOf(raw);
+export const HICP_PROVENANCE: CpiProvenance = provenanceOf(hicpRaw);

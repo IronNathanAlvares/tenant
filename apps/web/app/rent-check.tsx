@@ -1,6 +1,6 @@
 "use client";
 
-import { CPI_SNAPSHOT } from "@tenant/cpi";
+import { CPI_SNAPSHOT, HICP_SNAPSHOT } from "@tenant/cpi";
 import {
   buildPack,
   type Calculation,
@@ -110,7 +110,7 @@ export function RentCheck() {
   }, [form]);
 
   const result = useMemo(
-    () => (query === null ? null : evaluateRent(query, CPI_SNAPSHOT)),
+    () => (query === null ? null : evaluateRent(query, CPI_SNAPSHOT, HICP_SNAPSHOT)),
     [query],
   );
 
