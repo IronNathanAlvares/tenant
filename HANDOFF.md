@@ -91,48 +91,39 @@ found, and the dated rules engine should not claim sourced commencement dates un
 - **One Vercel dashboard setting.** See below. It is the only thing blocking a live URL.
 - A second opinion on open question 7, ideally from Threshold or a solicitor.
 
-### The Vercel deployment, resolved
+### The Vercel deployment, still failing, and I have run out of things to check from outside
 
-Three separate causes, found in order, none of them visible without account access to the
-build log. Recorded because the next person will hit at least one of them.
+The dashboard settings are now correct: Root Directory `apps/web`, "Include files outside
+the root directory in the Build Step" enabled, skip-when-unchanged enabled. The last of
+those is working, because a commit touching only `packages/` triggered a build rather than
+being skipped, which is what "or its dependencies" is meant to do.
 
-1. **pnpm 11 is unsupported.** Vercel falls back to pnpm 9, which failed on the pnpm 11
-   `allowBuilds` key in `pnpm-workspace.yaml` (vercel/vercel#17434). Fixed by pinning
-   `packageManager` to pnpm 10.34.5 and moving the build allowlist into `package.json`.
-2. **Root Directory was the repo root.** Vercel read the root `package.json`, found no
-   `next`, and failed with "No Next.js version detected". A `vercel.json` at the repo root
-   setting `outputDirectory` does not fix this and is a documented way to make it worse, so
-   that file was deleted. Fixed in the dashboard: Root Directory is now `apps/web`.
-3. **Files outside the root directory were not included.** With Root Directory set to
-   `apps/web`, Vercel uploads only that folder unless told otherwise, and `apps/web`
-   depends on `@tenant/rules` by `workspace:*` and extends `../../tsconfig.base.json`.
-   Reproduced locally by installing `apps/web` on its own:
+The build still fails, and Vercel's log needs account access.
 
-   ```
-   ERR_PNPM_WORKSPACE_PKG_NOT_FOUND
-   "@tenant/rules@workspace:*" is in the dependencies but no package
-   named "@tenant/rules" is present in the workspace
-   ```
+**What has been ruled out, by reproduction rather than reasoning:**
 
-   Fixed in the dashboard: Settings, Build and Deployment, under Root Directory, enable
-   **Include files outside of the Root Directory in the Build Step**.
+| Cause | How it was ruled out |
+|---|---|
+| The code | A clean clone of `main` installs and builds a working page |
+| The monorepo wiring | `cd apps/web && pnpm install --frozen-lockfile && pnpm exec next build`, which is Vercel's exact sequence with this root directory, exits 0 on both steps |
+| pnpm 11 | Real problem, fixed. Vercel does not support it and falls back to pnpm 9 (vercel/vercel#17434). Pinned to 10.34.5 |
+| Root Directory at the repo root | Real problem, fixed in the dashboard. Caused "No Next.js version detected" |
+| Files outside the root not uploaded | Reproduced locally as `ERR_PNPM_WORKSPACE_PKG_NOT_FOUND`. Fixed by the dashboard toggle |
+| Builds being skipped | Was happening, no longer is |
 
-4. **Builds were then skipped.** With a Root Directory set, Vercel only rebuilds when files
-   inside it change, and reported `Skipped - Not affected`. That default is wrong here,
-   because `apps/web` imports `@tenant/rules` and `@tenant/cpi`, so an engine change must
-   redeploy the site. Fixed by `apps/web/vercel.json` with `"ignoreCommand": "exit 1"`,
-   which tells Vercel never to skip. Exit 0 means skip, exit 1 means build.
-
-**Two things worth knowing.** Changing Root Directory does not retry past deployments, so
-nothing rebuilds until the next push or a manual redeploy. The Redeploy button is on the
-Deployments tab, in the three-dot menu on a deployment row, not in Settings.
-
-**If a deployment fails again,** get the log rather than guessing:
+**What is needed now is the log.** One command, and it ends the guessing:
 
 ```bash
 npx vercel login
-npx vercel inspect <deployment-url> --logs
+npx vercel inspect https://tenant-green.vercel.app --logs
 ```
 
-Deployment ids and states are readable without auth via
-`gh api repos/IronNathanAlvares/tenant/deployments`.
+Failing deployment ids are readable without auth:
+
+```bash
+gh api repos/IronNathanAlvares/tenant/deployments
+gh api repos/IronNathanAlvares/tenant/deployments/<id>/statuses
+```
+
+Nothing else in the project is blocked on this. The engine, the notice check and the
+measurements are all independent of whether the placeholder page is live.
