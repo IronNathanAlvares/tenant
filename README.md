@@ -17,7 +17,7 @@ See [`SPRINTS.md`](SPRINTS.md) for what happens next.
 | **S0** | Foundations, remaining research, repo, CI | **Complete.** CI green, deploy path proven, and it found something (below) |
 | S1 | The dated rules engine | **Complete.** 90 tests. One gap left open on purpose, below |
 | S2 | Ground truth against the official RTB calculator | **Complete.** 2,720 of 2,720, exact. And it disproved one of my own ADRs |
-| S3 | Notice validity | Not started |
+| S3 | Notice validity | **Complete.** 37 tests. One part deliberately left unbuilt, below |
 | S4 | Web app v1, live | Not started |
 | S5 | Explanation layer and dispute pack | Not started |
 | S6 | Listing check | Deferred, cut from v1 |
@@ -158,6 +158,40 @@ strict reading of the Act allows**, which means a landlord using the regulator's
 correctly can still end up above the statutory cap. The ADR carries a dated correction
 rather than a quiet edit. Full working in
 [`docs/measurements/02`](docs/measurements/02-engine-agreement.md).
+
+## The notice check, which is the half nobody else does
+
+A rent increase can sit perfectly inside the cap and still be worth nothing. Section 22(1)
+says a rent set on review "shall not have effect unless and until" the section 22(2)
+condition is met, and since 1 March 2026 that condition includes serving a copy on the RTB
+**the same day** it is served on the tenant. The RTB itself warns that posting it can miss
+that.
+
+```ts
+assessNotice({
+  servedOnTenant: parseDate("2026-06-01"),
+  servedOnBoard:  parseDate("2026-06-04"),   // posted, arrived three days later
+  newRentEffectiveFrom: parseDate("2026-09-01"),
+  ...
+});
+// rentTakesEffect: false
+// defect: board-same-day, severity "rent-has-no-effect", citing s. 22(2)
+// disputeDeadline: 2026-09-01, basis "effective-date"
+```
+
+Three things it is careful about:
+
+**An unanswered question is never a passed check.** Every requirement takes yes, no or
+unknown, and unknown produces an entry saying what it would have covered.
+
+**Not every breach voids the increase.** An unsigned notice comes back as `unclear` rather
+than voiding, because section 22(2B) sits outside the section 22(2) condition and it is
+genuinely arguable. Telling someone their notice is void when it is merely irregular sends
+them into a dispute they lose.
+
+**The deadline is computed and returned even when the notice is defective.** Section 22(3)
+gives the later of the effective date or 28 days from receipt, which in practice means the
+day the rent changes. Miss it and the amount cannot be disputed at all.
 
 ## The architecture, in one paragraph
 

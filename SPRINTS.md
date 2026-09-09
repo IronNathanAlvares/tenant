@@ -178,20 +178,48 @@ calculator and we are right, that is a finding and it goes in the README.
 
 | # | Task | Status |
 |---|---|---|
-| 3.0 | Carried from Sprint 1: the pre-2026 HICP regime behind section 19(6). Needs the CSO HICP series and the RPZ geography rules for settings before 20 June 2025 | todo |
-| 3.0b | Carried from Sprint 0 and 2: review righttenantry.ie, propdesk.ie, tenantsync.ie properly | todo |
-| 3.1 | `packages/rules/notice`: `NoticeQuery` and `Defect` types, each defect citing a rule | todo |
-| 3.2 | 90 day rule, counted from service to the date the new rent takes effect | todo |
-| 3.3 | Same-day RTB filing rule, only for notices served on or after 1 March 2026 | todo |
-| 3.4 | 12 month frequency rule, section 20 as amended by section 9 of the 2026 Act | todo |
-| 3.5 | Required attachments: calculator printout, or register printout with three comparables | todo |
-| 3.6 | Correct form used, and rent details updated on the register within one month | todo |
-| 3.7 | Severity model: which defects void the notice and which are breaches without voiding it | todo |
-| 3.8 | Scenario tests, one per defect plus combinations | todo |
+| 3.0 | Carried from Sprint 1: the pre-2026 HICP regime behind section 19(6) | **investigated, deliberately not built.** Structure confirmed identical to the current one, data located (CSO CPM23). Blocked on confirming which HICP series was operative. Doc 01 §11 |
+| 3.0b | Carried from Sprint 0 and 2: review righttenantry.ie, propdesk.ie, tenantsync.ie properly | **done.** Doc 01 §7a. One of them is now actively wrong |
+| 3.1 | `packages/rules/notice`: `NoticeQuery` and `Defect` types, each defect citing a rule | **done** |
+| 3.2 | 90 day rule, counted from service to the date the new rent takes effect | **done** |
+| 3.3 | Same-day RTB filing rule, only for notices served on or after 1 March 2026 | **done.** Not applied retrospectively, which is tested |
+| 3.4 | Frequency rule, section 20 with the new section 20B | **done.** Under 12 months is a defect. The contested 12-to-24 month case is an open argument, not a defect |
+| 3.5 | Required contents, all of section 22(2A) | **done.** Eleven checks including RT numbers on the comparables |
+| 3.6 | Prescribed form | **done.** The one month registration update is a separate obligation and is not modelled |
+| 3.7 | Severity model | **done.** Four levels. An unsigned notice is `unclear`, not voiding, because s. 22(2B) sits outside the s. 22(2) condition |
+| 3.8 | Scenario tests | **done.** 37 tests |
 
-**3.7 needs care.** Not every breach voids a notice. Saying "your notice is invalid" when
-it is merely irregular sends someone into a dispute they lose. If the law is unclear on a
-given defect, say it is unclear.
+**3.7 needed care and got it.** Not every breach voids a notice. The severity model has
+four levels, and two decisions in it are worth defending:
+
+An **unsigned notice** is `unclear`, not voiding. Section 22(2B) sits outside the section
+22(2) condition that section 22(1) hangs the rent's effect on, so on the face of the Act it
+is arguable either way. Claiming it voids the increase would send someone into a dispute on
+a weaker footing than they think they have.
+
+A **missing BER** is not asserted as a defect at all. It is only required where the Energy
+Performance of Buildings Regulations apply to the building, which a tenant cannot reliably
+determine, so it is raised as a question rather than a finding.
+
+### What Sprint 3 delivered
+
+The notice engine, 37 tests, passing first run. The scenario the product exists for is a
+test: a rent increase perfectly inside the cap, void because the landlord posted the RTB
+copy three days late.
+
+**The section 22(3) deadline is computed.** The later of the date the rent takes effect or
+28 days from receipt, which in practice means the effective date, with a countdown and a
+`passed` flag. It is returned even when the notice is defective, because someone whose
+notice is void still needs to know the date.
+
+**An unanswered question is never a passed check.** Every requirement takes yes, no or
+unknown, and unknown produces an entry in `notAssessed` explaining what it would have
+covered. A tenant who answered three questions is told what the other ten were.
+
+**The contested frequency point is presented as an argument, not a defect.** My reading of
+section 20(4) to (6) with the new 20B says a pre-March-2026 tenancy is on a 24 month cycle
+until June 2027. The RTB says 12. The engine reports the RTB's position, raises mine as
+something to ask Threshold about, and a test asserts it never becomes a defect.
 
 ---
 

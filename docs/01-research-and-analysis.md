@@ -386,9 +386,43 @@ I looked at `rents.ie/tools/rent-increase` in detail. It:
 - Does not ask about the same-day RTB filing rule
 - Does not distinguish the pre and post 1 March 2026 CPI reference month
 
-Others in the same space are `righttenantry.ie`, `propdesk.ie` and `tenantsync.ie`.
-Sprint 0 includes checking each of them properly rather than taking one sample as
-representative.
+### 7a. The other three, reviewed in Sprint 3
+
+Carried from Sprint 0 twice before being done properly. The picture is more mixed than one
+sample suggested, and one of them is worse than `rents.ie`.
+
+**`righttenantry.ie/tools/rpz-calculator`** is the closest thing to a competitor. It has
+caught up on the substance: it applies "the lower of inflation (CPI) or 2% a year,
+pro-rated over the time since the rent was last set", it knows RPZs were replaced, and it
+uses CPI rather than HICP. It takes two inputs, the current rent and the date last set.
+
+It is also honest about what it does not do, and the list is the interesting part. It
+explicitly excludes new-build apartments and SSA exempt from the 2% cap, market rent resets
+at the start of a tenancy and at six years, and areas under rent control for less than two
+years. In other words it handles the easy path and declines every hard case. It cites no
+provision, checks nothing about the notice, and produces no audit trail.
+
+**`tenantsync.ie`** is the outlier, and it is now actively wrong. It still applies "the
+lower of HICP or 2%" and, per its own article, **explicitly tells readers that CPI is the
+wrong measure to use**. That was true until 28 February 2026 and has been false since. It
+does at least explain the 90 day rule and mention the same-day RTB filing requirement in a
+related article, which is more than the others manage, but its calculator is running the
+repealed regime.
+
+**`propdesk.ie`** advertises live CPI data and no signup, and still describes itself in
+terms of "RPZ rules". The page 404s to a plain fetch, so I have not been able to check its
+arithmetic directly and I am not going to characterise it from a search snippet.
+
+**What this does to the gap.** "Nobody has caught up" is not the claim. `righttenantry.ie`
+has caught up on the ordinary case. The claim that survives is narrower and better:
+
+- Nobody is **date-aware**, so nobody can answer about a notice served before 1 March 2026
+- Nobody handles the **hard cases**. The one that is most current declines them explicitly
+- Nobody **checks the notice**, which is where the leverage is
+- Nobody **cites anything**, so nothing they output is usable at an adjudication
+- Nobody shows the **statutory reading** alongside the RTB's, and
+  [`measurements/02`](measurements/02-engine-agreement.md) shows those differ by a median
+  of 4.05 euro a month and up to 173.36
 
 The gap is not "a rent calculator exists". It is:
 
@@ -479,6 +513,45 @@ Five conclusions, each of which becomes a decision record.
 | 6 | Is the RTB calculator scriptable | **Closed, better than hoped** | The whole calculation is client-side JavaScript and readable. Sprint 2 changes shape accordingly |
 | 7 | Does the 24 month review frequency still bite for pre-1-March-2026 tenancies | **Open, and it matters** | My reading of section 20(4) to (6) with the new 20B(2) says yes until 20 June 2027. The RTB says 12 months except on the section 24C path. See §5b |
 | 8 | Which sections of the 2026 Act commenced on which day, per the commencement order | **Open** | Section 1(2) commences most of the Act by ministerial order. 1 March 2026 is universally reported but I have not found the S.I. itself |
+| 9 | Which HICP series was operative under the pre-2026 regime | **Open, blocks the section 19(6) path** | See §11 |
+
+---
+
+## 11. The pre-2026 HICP regime, and why it is not built yet
+
+Section 19(6) keeps the repealed regime alive for any notice served before 1 March 2026, so
+this is live law, not history. The engine detects those notices, cites the provision and
+**refuses to answer**, pointing at Threshold. That is deliberate.
+
+Two of the three things needed are now known.
+
+**The structure is identical.** Section 3 of the Residential Tenancies (Amendment) Act 2021
+(No. 39 of 2021) inserted the same two-constraint shape the current section 19(4) has: a
+relevant percentage cap, and a cap on the ratio of new rent to old rent at the ratio of the
+current index value to the previous. The definition of "previous HICP value" carries the
+same asymmetry, pivoting on the commencement of section 3 of that Act rather than on
+1 March 2026. So when this is built it is the existing code with different parameters, not
+a second implementation.
+
+**The data exists.** CSO PxStat table **CPM23**, "EU Harmonised Index of Consumer Prices",
+statistic `CPM23C01`, sub index `CP00` (All Items), 357 months to July 2026, same shape as
+CPM24.
+
+**What is missing is the one that matters.** The statutory definition of "HICP value" is
+not in section 3 of the 2021 Act and was substituted out of section 19(7) by the 2026 Act,
+so it is not in the current consolidated text either. Until it is read from the Act that
+introduced it, choosing `CPM23C01`/`CP00` would be an assumption, and section 19(4C) points
+at the table the **Board** published rather than at a CSO series directly, exactly as it now
+does for CPI.
+
+Guessing here is worse than in any other part of the project. These notices were served
+months ago, the rents already changed, and a tenant acting on a wrong figure has usually
+already missed the section 22(3) deadline by the time anyone notices. Refusing is the
+correct behaviour until the series is confirmed.
+
+**To close it:** read section 19(7) as it stood before the 2026 Act, most likely from the
+Residential Tenancies (No. 2) Act 2021 (No. 17 of 2021) or the 2021 Amendment Act as
+enacted, and find the RTB's archived HICP table to confirm the values match.
 
 Questions 4, 5 and 6 were expected to be Sprint 2 work resolved by black-box probing. They
 were closed in Sprint 0 instead by reading the official implementation, which also turned

@@ -52,6 +52,21 @@ export {
   subtractCents,
 } from "./money";
 export {
+  type Answer,
+  assessNotice,
+  type Defect,
+  DISPUTE_WINDOW_DAYS,
+  type DisputeDeadline,
+  disputeDeadline,
+  NOTICE_PERIOD_DAYS,
+  type NotAssessed,
+  type NoticeAssessment,
+  type NoticeContents,
+  type NoticeQuery,
+  type Severity,
+  severityRank,
+} from "./notice";
+export {
   describeRegime,
   isBeforeCommencement,
   percentageCapApplies,

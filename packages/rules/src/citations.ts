@@ -118,6 +118,47 @@ export const CITATIONS = {
     effect:
       "A dispute about a rent set on review must reach the RTB before the later of the date the rent takes effect or 28 days after the tenant received the notice.",
   },
+  noticeContents: {
+    act: RTA_2004,
+    provision: "s. 22(2A)",
+    url: RTA_2004_S22,
+    effect:
+      "The notice must state the dispute deadline, a statement that the rent is not above market rent, three comparable dwellings from the published register with their RT numbers, the floor area, the BER where applicable, the date it was signed, and how the rent was calculated under section 19(4).",
+  },
+  noticeComparables: {
+    act: RTA_2004,
+    provision: "s. 22(2A)(d)",
+    url: RTA_2004_S22,
+    effect:
+      "Three dwellings of similar floor area, bedrooms, type, character and BER in a comparable area, taken from the published register, each identified by the number assigned under section 135(3).",
+  },
+  noticeCalculationShown: {
+    act: RTA_2004,
+    provision: "s. 22(2A)(f) and (g)",
+    url: RTA_2004_S22,
+    effect:
+      "The notice must show how the rent was calculated having regard to section 19(4), or state why section 19(4) does not apply.",
+  },
+  noticeSignature: {
+    act: RTA_2004,
+    provision: "s. 22(2B)",
+    url: RTA_2004_S22,
+    effect: "The notice must be signed by the landlord or an authorised agent.",
+  },
+  noticeOffence: {
+    act: RTA_2004,
+    provision: "s. 22(4)",
+    url: RTA_2004_S22,
+    effect:
+      "It is a criminal offence for a landlord to set a rent on review by serving a notice that does not meet the section 22(2) condition.",
+  },
+  reviewFrequencyNewTenancies: {
+    act: RTA_2004,
+    provision: "s. 20B(2)",
+    url: RTA_2004_S20,
+    effect:
+      "For a tenancy commencing on or after 1 March 2026, the review is carried out as if the 24 month extension in section 20(4) to (6) had never been enacted, so the interval is 12 months.",
+  },
   costRentalExcluded: {
     act: "Affordable Housing Act 2021",
     provision: "s. 33(1)",
