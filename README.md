@@ -9,7 +9,7 @@ Standalone project. Nothing else needs to exist for it to run.
 
 ## Status
 
-The rent check and the notice check are built and tested. The Vercel deployment is still failing for reasons that need its build log.
+Built, tested and documented. 246 tests. The Vercel deployment is still failing for reasons that need its build log, so it is not live yet.
 See [`SPRINTS.md`](SPRINTS.md) for what happens next.
 
 | Sprint | What | State |
@@ -21,7 +21,7 @@ See [`SPRINTS.md`](SPRINTS.md) for what happens next.
 | S4 | Web app v1 | **Built and tested.** Not live yet, see the deployment note |
 | S5 | Dispute pack | **Complete.** The explanation layer was dropped on purpose, below |
 | S6 | Listing check | Deferred, cut from v1 |
-| S7 | Ship | Not started |
+| S7 | Measure and ship | **Complete except the launch itself.** Accessibility is a CI gate now, and it found a real WCAG failure |
 
 Hosted on Vercel, deployed from GitHub. The first release is the rent check, the notice
 check and the dispute pack. The listing scam checker is designed but deliberately not in
@@ -221,6 +221,17 @@ runs in the browser, which means your rent and your address never reach a server
 model is used to explain a finished determination in plain English and is never allowed
 to compute anything, enforced by an assertion that every number in the generated prose
 appears in the determination.
+
+## What is wrong with it
+
+[`docs/12-reality-check.md`](docs/12-reality-check.md) is the document worth reading. Ten
+entries, written during the build. The short version: I got my own headline figure wrong and
+shipped it in this README, I wrote a decision record asserting a quantity before measuring it
+and the measurement contradicted it, a test passed for the wrong reason and hid a real bug in
+the form, and I inferred a deployment failure three times without the log and was wrong twice.
+
+Still open and named rather than buried: the pre-2026 HICP path is not built, one legal
+question needs a solicitor, and nobody outside this project has used the site.
 
 ## What it is not
 

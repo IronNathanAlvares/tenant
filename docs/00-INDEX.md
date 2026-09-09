@@ -36,10 +36,10 @@ records below.
 | 04 | HLD | Package boundaries, the request path, where the engine runs | Sprint 1 |
 | 05 | LLD | Rule set schema, the determination type, the audit trail format | Sprint 1 |
 | 09 | Test and eval plan | Golden vectors, property tests, the differential harness | Sprint 2 |
-| 11 | Interview pitch | How to explain it, demo it and defend it | Sprint 7 |
-| 12 | Reality check | Written during the build. Where the design was wrong | Sprint 7 |
-| 13 | Security and privacy | Threat model, what is enforced by a test, what is not done | Sprint 4 |
-| 14 | Running it | Every command in order, and what each should print | Sprint 4 |
+| 11 | [Interview pitch](11-interview-pitch.md) | How to explain it, demo it and defend it | Written |
+| 12 | [Reality check](12-reality-check.md) | **Where the design was wrong, ten entries.** The one worth reading | Written |
+| 13 | Security and privacy | Threat model. Largely covered by ADR-0007, ADR-0008 and `14` §5 | Not written |
+| 14 | [Running it](14-running-it.md) | Every command, the monthly CPI job, and the law-change watch | Written |
 
 ## Measurements
 

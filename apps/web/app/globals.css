@@ -15,7 +15,9 @@
   --muted: #5c5a63;
   --faint: #8b8894;
   --rule: #e3e0da;
-  --rule-strong: #cfcbc2;
+  /* 3.39:1 on --surface. WCAG 2.2 SC 1.4.11 wants 3:1 for input borders, and the
+     previous #cfcbc2 measured 1.62:1. See apps/web/tests/contrast.test.ts. */
+  --rule-strong: #8f8b83;
 
   --accent: #1f5c3d;
   --accent-soft: #eef4f0;
@@ -42,7 +44,8 @@
     --muted: #a5a2af;
     --faint: #7e7b89;
     --rule: #33313c;
-    --rule-strong: #46434f;
+    /* 3.23:1 on the dark --surface. The previous #46434f measured 1.73:1. */
+    --rule-strong: #6f6b78;
 
     --accent: #7fc8a0;
     --accent-soft: #1b2a22;

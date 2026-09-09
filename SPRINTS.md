@@ -360,17 +360,19 @@ the README says so.
 ## Sprint 7. Ship it
 
 **Goal:** real users.
+**Ends with:** accessibility measured rather than assumed, the maintenance jobs written
+down, and the honest account of what went wrong.
 
 | # | Task | Status |
 |---|---|---|
-| 7.1 | Live on the Vercel URL, HTTPS, security headers, sane CSP. Custom domain optional | todo |
-| 7.2 | Lighthouse and axe pass. Real device testing | todo |
-| 7.3 | Three minute demo recording | todo |
-| 7.4 | `docs/12-reality-check.md`: everywhere the design was wrong during the build | todo |
-| 7.5 | `docs/11-interview-pitch.md` | todo |
-| 7.6 | CPI update runbook, plus a CI check that fails when a new CSO month is published | todo |
-| 7.7 | A law-change watch note. This Act will be amended, and stale legal software is worse than none | todo |
-| 7.8 | Post it where tenants are: Reddit r/ireland and r/DublinCity, Threshold, college accommodation groups | todo |
+| 7.1 | Security headers and CSP | **done and verified served**, including `connect-src 'none'`. Not live: the deployment still fails and needs its build log |
+| 7.2 | Accessibility | **done as a CI gate, not a one-off.** axe on both pages, keyboard path, and WCAG contrast computed from the tokens. It found a real failure |
+| 7.3 | Three minute demo recording | **not done.** Needs screen recording and a live URL. Script written in `docs/11` §4 |
+| 7.4 | `docs/12-reality-check.md` | **done.** Ten entries, kept honest |
+| 7.5 | `docs/11-interview-pitch.md` | **done** |
+| 7.6 | CPI update runbook, plus the CI freshness check | **done.** `docs/14` §3, check wired in Sprint 0 |
+| 7.7 | Law-change watch | **done.** `docs/14` §4, with sources, cadence and two dates already in the diary |
+| 7.8 | Post it where tenants are | **not done.** Needs a live URL, and it is Nathan's to do |
 
 ---
 
@@ -398,3 +400,33 @@ Named here so they do not creep in later.
 | Someone relies on this and loses | Real harm | Boundary in the interface. `Unknown` where inputs cannot be verified. Point to Threshold and the RTB |
 | Nobody finds the site | Effort wasted | 7.8 is a task, not an afterthought |
 | Scam detection has no labels | Overclaimed precision | Say there is no precision figure. Signals with reasons, not a score |
+
+### What Sprint 7 found
+
+**Accessibility was ticked "partly" in Sprint 4 and the honest version found a real
+failure.** Input borders measured **1.62:1** in light and **1.73:1** in dark. WCAG 2.2 SC
+1.4.11 wants 3:1 for UI components that carry meaning, so the form fields were too faint to
+see reliably. Both tokens were darkened.
+
+That was only found because task 4.7 was not closed on a hand check. axe cannot measure
+contrast in jsdom, so rather than declare it untestable, the design tokens are parsed out of
+`globals.css` and every pair the interface actually renders is checked in both themes. It is
+now a build gate: nudging a colour to look better in dark mode cannot quietly drop a verdict
+state below the threshold.
+
+**The CSP says the same thing three ways.** The homepage promises nothing is sent anywhere,
+a test traps every network primitive, and `connect-src 'none'` tells the browser. The third
+is the one an attacker cannot talk their way past: if a dependency were compromised and tried
+to exfiltrate a rent figure, the browser blocks it even though the code shipped.
+
+### What is left, and who it belongs to
+
+**Mine, blocked:** the demo recording needs a live URL. The script is written.
+
+**Nathan's:** posting it where tenants are, and the Vercel build log. The deployment has
+failed on every commit for days. A clean clone runs Vercel's exact sequence and exits 0 on
+both steps, so the cause is not visible from outside.
+
+**Genuinely open, and named rather than buried:** the pre-2026 HICP path, the contested
+section 20 review frequency, the commencement order, and the fact that nobody outside this
+project has used the site. All in `docs/12-reality-check.md`.

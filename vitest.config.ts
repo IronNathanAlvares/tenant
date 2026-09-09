@@ -17,7 +17,7 @@ export default defineConfig({
         esbuild: { jsx: "automatic" },
         test: {
           name: "web",
-          include: ["apps/web/tests/**/*.test.tsx"],
+          include: ["apps/web/tests/**/*.test.tsx", "apps/web/tests/**/*.test.ts"],
           environment: "jsdom",
           globals: true,
         },
