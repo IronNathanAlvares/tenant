@@ -174,8 +174,31 @@ describe("the rent check, end to end through the form", () => {
   it("R-SAFE-03: every result names Threshold and the RTB", async () => {
     render(<RentCheck />);
     await fillWorkedExample();
-    expect(screen.getByText(/1800 454 454/)).toBeDefined();
+    // Repeated on purpose: once on screen, once in the pack, which has to stand alone
+    // once it is printed.
+    expect(screen.getAllByText(/1800 454 454/).length).toBeGreaterThan(0);
     expect(screen.getByText(/disputes@rtb\.ie/)).toBeDefined();
+  });
+
+  it("produces a printable pack with a letter that carries the figure", async () => {
+    render(<RentCheck />);
+    const user = await fillWorkedExample();
+    openOptionalSections();
+    await user.type(screen.getByLabelText(/what is the landlord asking for/i), "2200");
+
+    const letter = document.querySelector("textarea.letter") as HTMLTextAreaElement | null;
+    expect(letter).not.toBeNull();
+    expect(letter?.value).toContain("€2,050.00");
+    expect(letter?.value).toContain("My working:");
+    // R-SAFE-04, again, at the point it actually reaches a landlord.
+    expect(letter?.value).not.toMatch(/offence|criminal|you will win/i);
+  });
+
+  it("the pack lists the law it rests on", async () => {
+    render(<RentCheck />);
+    await fillWorkedExample();
+    const citations = document.querySelectorAll("ul.citation-list li");
+    expect(citations.length).toBeGreaterThan(1);
   });
 });
 

@@ -609,3 +609,156 @@ footer p {
     }
   }
 }
+
+/* ------------------------------------------------------------------- the pack */
+
+.pack-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 1.5rem 0;
+}
+
+button.action {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.7rem 1.1rem;
+  min-height: 2.9rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+  cursor: pointer;
+}
+
+button.action.secondary {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--rule-strong);
+}
+
+button.action:hover {
+  filter: brightness(1.08);
+}
+
+.letter {
+  width: 100%;
+  min-height: 26rem;
+  font: 400 0.9375rem/1.6 ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  padding: 1rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  resize: vertical;
+  white-space: pre-wrap;
+}
+
+.pack-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.pack-section ul {
+  padding-left: 1.1rem;
+}
+
+.pack-section li {
+  margin-bottom: 0.45rem;
+}
+
+ul.citation-list {
+  list-style: none;
+  padding: 0;
+}
+
+ul.citation-list li {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+ul.citation-list li:last-child {
+  border-bottom: 0;
+}
+
+/*
+ * Print, which is how this actually reaches an adjudicator.
+ *
+ * The browser's own print-to-PDF is used rather than a PDF library. It works offline, adds
+ * nothing to the bundle, keeps everything on the device, and every phone and desktop
+ * already has it. See ADR-0008 and docs 05.
+ */
+@media print {
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-sunk: #ffffff;
+    --text: #000000;
+    --muted: #333333;
+    --rule: #bbbbbb;
+    --rule-strong: #999999;
+    --accent: #000000;
+    --accent-soft: #ffffff;
+    --ok: #000000;
+    --bad: #000000;
+    --warn: #000000;
+    --ok-soft: #ffffff;
+    --bad-soft: #ffffff;
+    --warn-soft: #ffffff;
+    --shadow: none;
+  }
+
+  body {
+    padding: 0;
+    font-size: 11pt;
+  }
+
+  main {
+    max-width: none;
+  }
+
+  /* Controls and navigation are noise on paper. */
+  .no-print,
+  .pack-actions,
+  form,
+  details,
+  .crosslink {
+    display: none !important;
+  }
+
+  /* A URL nobody can click is worth printing, so a reader can check the provision. */
+  a.cite::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    word-break: break-all;
+  }
+
+  .result,
+  .next-steps,
+  .pack-section {
+    break-inside: avoid;
+    box-shadow: none;
+    border-color: #999;
+  }
+
+  .verdict,
+  .deadline {
+    border-left-width: 3px;
+  }
+
+  .letter {
+    border: 1px solid #999;
+    min-height: auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  h1 {
+    font-size: 18pt;
+  }
+
+  .figure {
+    font-size: 20pt;
+  }
+}

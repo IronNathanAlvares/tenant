@@ -3,6 +3,7 @@
 import {
   type Answer,
   assessNotice,
+  buildPack,
   type DisputeDeadline,
   type NoticeAssessment,
   type NoticeContents,
@@ -13,6 +14,7 @@ import {
 } from "@tenant/rules";
 import { useMemo, useState } from "react";
 import { Choices, CiteLink, DateField, longDate, NextSteps } from "../shared";
+import { DisputePackSection } from "../shared-pack";
 
 /**
  * The notice check.
@@ -340,6 +342,14 @@ function Assessment({ result }: { result: NoticeAssessment }) {
           </p>
         )}
       </NextSteps>
+
+      <DisputePackSection
+        pack={buildPack(null, result, {
+          today: parseDate(new Date().toISOString().slice(0, 10)),
+        })}
+        rentTitle="What we worked out about the amount"
+        noticeTitle="What we worked out about the notice"
+      />
 
       <a className="crosslink" href="/">
         Check the amount as well

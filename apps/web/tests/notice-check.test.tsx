@@ -12,6 +12,18 @@ import { NoticeCheck } from "../app/notice/notice-check";
 
 afterEach(cleanup);
 
+/**
+ * The on-screen result and the printable pack deliberately repeat each other. The pack has
+ * to stand alone once it is printed, so the verdict, the deadline and the Threshold number
+ * all appear twice. Assertions therefore either scope to the result card or expect more
+ * than one match, rather than treating the repetition as a bug.
+ */
+function inResult() {
+  const card = document.querySelector(".result");
+  if (card === null) throw new Error("no result card rendered");
+  return within(card as HTMLElement);
+}
+
 async function fillDates(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/when were you given the notice/i), "2026-06-01");
   await user.type(screen.getByLabelText(/when does the new rent start/i), "2026-09-01");
@@ -36,10 +48,10 @@ describe("the notice check", () => {
     await user.type(screen.getByLabelText(/what day did the RTB get it/i), "2026-06-04");
 
     expect(
-      screen.getByText(/this increase did not take effect/i),
+      inResult().getByText(/this increase did not take effect/i),
       "a notice filed late should void the increase",
     ).toBeDefined();
-    expect(screen.getByText(/3 days after/i)).toBeDefined();
+    expect(inResult().getByText(/3 days after/i)).toBeDefined();
   });
 
   it("shows the deadline prominently, and dates it correctly", async () => {
@@ -59,7 +71,7 @@ describe("the notice check", () => {
     await fillDates(user);
     await pickBoard("Never sent", user);
 
-    expect(screen.getByText(/this increase did not take effect/i)).toBeDefined();
+    expect(inResult().getByText(/this increase did not take effect/i)).toBeDefined();
     expect(document.querySelector(".deadline .date")?.textContent).toBe("1 September 2026");
   });
 
@@ -80,7 +92,7 @@ describe("the notice check", () => {
     expect(screen.queryByText(/criminal offence/i)).toBeNull();
 
     await pickBoard("Never sent", user);
-    expect(screen.getByText(/criminal offence/i)).toBeDefined();
+    expect(screen.getAllByText(/criminal offence/i).length).toBeGreaterThan(0);
   });
 
   it("flags too little notice", async () => {
@@ -89,7 +101,8 @@ describe("the notice check", () => {
     await user.type(screen.getByLabelText(/when were you given the notice/i), "2026-08-01");
     await user.type(screen.getByLabelText(/when does the new rent start/i), "2026-09-01");
 
-    expect(screen.getByText(/31 days' notice was given, 59 short/i)).toBeDefined();
+    // In the result card, in the pack summary, and in the letter's list of defects.
+    expect(screen.getAllByText(/31 days' notice was given, 59 short/i).length).toBeGreaterThan(1);
   });
 
   it("does not apply the same-day rule to a notice served before 1 March 2026", async () => {
@@ -122,6 +135,20 @@ describe("the notice check", () => {
     render(<NoticeCheck />);
     const user = userEvent.setup();
     await fillDates(user);
-    expect(screen.getByText(/1800 454 454/)).toBeDefined();
+    expect(screen.getAllByText(/1800 454 454/).length).toBeGreaterThan(0);
+  });
+
+  it("produces a printable pack with a letter and the citations", async () => {
+    render(<NoticeCheck />);
+    const user = userEvent.setup();
+    await fillDates(user);
+    await pickBoard("Never sent", user);
+
+    const letter = document.querySelector("textarea.letter") as HTMLTextAreaElement | null;
+    expect(letter).not.toBeNull();
+    expect(letter?.value).toContain("Dear landlord,");
+    expect(letter?.value).toContain("section 22 of the Residential Tenancies Act 2004");
+    expect(document.querySelectorAll("ul.citation-list li").length).toBeGreaterThan(1);
+    expect(screen.getByRole("button", { name: /print, or save as PDF/i })).toBeDefined();
   });
 });

@@ -294,9 +294,40 @@ is *lower* than the RTB's means something quite different to the reader.
 | 5.6 | Next steps: mediation, adjudication, fees, Threshold, with the limitation period from task 0.4 | todo |
 | 5.7 | Plain English pass on all output. Reading age target, measured | todo |
 
-**5.2 is the whole safety argument.** The model paraphrases a number it was given. If a
-number appears in the prose that is not in the determination, the render fails. That is
-an assertion in code, not a prompt instruction.
+**5.2 was the whole safety argument, and it is now moot in a better way.** The guard existed
+to stop a model inventing a number. There is no model at request time, so there is no number
+to invent.
+
+### The sprint's premise did not survive Sprint 4
+
+Sprint 5 was specified in Sprint 0 as a model explanation layer. Sprint 4 then put
+"nothing you typed was sent anywhere" above the fold and enforced it with a test that traps
+every network primitive. A `Determination` carries someone's rent, their dates and their
+tenancy type. Sending it to a model is sending their rent to a third party, and the promise
+was not "we anonymise it".
+
+So the layer went, and what it was buying got looked at honestly. Two of the three things a
+model would have added are genuinely lost: wording that adapts to unusual cases, and the
+ability to ask a follow-up. The third and most valuable for this audience, translation, is
+not lost at all, because it is build-time work a model can do in the repository where a
+person reviews the output. ADR-0008.
+
+**No PDF library either.** The browser's own print-to-PDF works offline, adds nothing to the
+bundle, exists on every device, and keeps the document on the device. A JavaScript PDF
+generator would add hundreds of kilobytes to a page whose promise is a fast answer.
+
+### Two things the tests caught
+
+**The readability check found its own bug first.** It scored the prose at grade 51, which is
+not a real Flesch-Kincaid value. The number-stripping regex had a full stop inside its
+character class, so it ate every sentence ending and read the whole summary as one 130 word
+sentence. Fixed, and it then caught two genuinely overlong sentences in the letter, which
+were split.
+
+**The notice page produced no letter.** `buildPack` required a rent determination before it
+would write one, so someone who only checked their notice got nothing. That is backwards: a
+defective notice is often the stronger of the two grounds. Fixed, with a test that the
+notice-only letter does not invent a rent figure it was never given.
 
 ---
 

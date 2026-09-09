@@ -62,6 +62,7 @@ filled in the sprint named.
 | [0005](adr/ADR-0005-typescript-and-a-pure-engine.md) | TypeScript, engine is pure | One implementation, runs in the browser, so rent and address never leave the device |
 | [0006](adr/ADR-0006-follow-the-calculator-show-the-statute.md) | Follow the RTB calculator, show the statutory figure too | The official tool diverges from section 19(4) in two places, and the landlord's notice will carry its number |
 | [0007](adr/ADR-0007-no-third-party-scripts-on-the-calculation-pages.md) | No third-party scripts on the calculation pages | Sentry and analytics would break the privacy claim, and the test that enforces it |
+| [0008](adr/ADR-0008-the-model-does-not-run-at-request-time.md) | The model does not run at request time | A determination contains someone's rent. Explaining it to a model means sending it. Supersedes the runtime half of ADR-0002 |
 
 ---
 

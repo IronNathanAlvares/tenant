@@ -19,7 +19,7 @@ See [`SPRINTS.md`](SPRINTS.md) for what happens next.
 | S2 | Ground truth against the official RTB calculator | **Complete.** 2,720 of 2,720, exact. And it disproved one of my own ADRs |
 | S3 | Notice validity | **Complete.** 37 tests. One part deliberately left unbuilt, below |
 | S4 | Web app v1 | **Built and tested.** Not live yet, see the deployment note |
-| S5 | Explanation layer and dispute pack | Not started |
+| S5 | Dispute pack | **Complete.** The explanation layer was dropped on purpose, below |
 | S6 | Listing check | Deferred, cut from v1 |
 | S7 | Ship | Not started |
 

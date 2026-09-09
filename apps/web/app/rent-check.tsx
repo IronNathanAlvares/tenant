@@ -2,6 +2,7 @@
 
 import { CPI_SNAPSHOT } from "@tenant/cpi";
 import {
+  buildPack,
   type Calculation,
   type Cents,
   type Determination,
@@ -24,6 +25,7 @@ import {
   NextSteps,
   Provenance,
 } from "./shared";
+import { DisputePackSection } from "./shared-pack";
 
 /**
  * The rent check.
@@ -230,6 +232,14 @@ function Result({
       )}
 
       <NextSteps />
+
+      <DisputePackSection
+        pack={buildPack(determination, null, {
+          today: parseDate(new Date().toISOString().slice(0, 10)),
+        })}
+        rentTitle="What we worked out about the amount"
+        noticeTitle="What we worked out about the notice"
+      />
 
       <Provenance
         rulesVersion={determination.provenance.rulesVersion}
