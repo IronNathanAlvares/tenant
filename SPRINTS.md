@@ -230,19 +230,52 @@ something to ask Threshold about, and a test asserts it never becomes a defect.
 
 | # | Task | Status |
 |---|---|---|
-| 4.1 | Next.js app, App Router, on Vercel | todo |
-| 4.2 | The engine runs client side. No rent or address is sent to the server for the basic check | todo |
-| 4.3 | Rent check form. Progressive: three questions first, more only if the answer needs them | todo |
-| 4.4 | Result view: the verdict, the maximum, the calculation shown step by step, the citation | todo |
-| 4.5 | Notice check flow | todo |
-| 4.6 | The boundary statement in the interface, above the fold, not in the footer | todo |
-| 4.7 | Accessibility: keyboard path, screen reader, contrast. Tested, not assumed | todo |
-| 4.8 | Mobile first. Most of this traffic will be someone on a phone in a kitchen | todo |
-| 4.9 | Sentry, and privacy-respecting analytics with no rent values in any event | todo |
-| 4.10 | Static CPI snapshot shipped with the bundle, its version and date shown on the result | todo |
+| 4.1 | Next.js app, App Router | **done.** Two static pages, both prerendered |
+| 4.2 | The engine runs client side. Nothing is sent to a server | **done, and asserted.** A test traps `fetch`, `XMLHttpRequest`, `WebSocket` and `sendBeacon` and fails if any fires during a calculation |
+| 4.3 | Rent check form, progressive | **done, after a correction.** See below |
+| 4.4 | Result view: verdict, maximum, step by step calculation, citations | **done.** Nine audit steps, five citations, all linking to the provision |
+| 4.5 | Notice check flow | **done.** Service dates first, nine content questions behind a disclosure |
+| 4.6 | Boundary statement above the fold | **done.** On both pages |
+| 4.7 | Accessibility | **partly.** Labels, hints and errors verified wired in a real browser. Radio groups are real fieldsets with legends. Contrast and a full keyboard pass are not yet measured, so this carries to Sprint 7 |
+| 4.8 | Mobile first | **done.** One column, 16px minimum inputs so iOS does not zoom, native date pickers, tap targets at 2.9rem |
+| 4.9 | Sentry and analytics | **deliberately not done.** Writing the privacy test turned this into a decision. See ADR-0007 |
+| 4.10 | Static CPI snapshot shipped with the bundle, version and date shown | **done.** Every result names the CPI month, the rules version and the snapshot hash |
 
-**4.2 is the design commitment.** It is what lets the site say "we never see your rent",
-and it is only free if Sprint 1 kept the engine pure.
+**4.2 is the design commitment**, and it held. The engine being pure meant the page needed
+no server at all, and the claim is now enforced by a test rather than promised.
+
+### The form had a real bug, and a test was passing for the wrong reason
+
+The new-build question started life behind the "add more detail" disclosure with a default
+of `unknown`. That meant **every first-time visitor got the two-branch "it depends" answer
+rather than a figure**, which is the opposite of a sixty second product.
+
+Worse, the worked-example test passed anyway, because 2,050.00 is one of the two branches.
+It was asserting that a number appeared somewhere on the page, not that the page had reached
+a conclusion. That is the sort of test that makes things look fine while they are not.
+
+Fixed by moving the question into the main form and defaulting it to the common case.
+Defaulting it to `no` while leaving it hidden would have been worse than the bug: it would
+quietly assume people out of a regime they might be in. Every result assertion now checks
+the verdict label, and there are two regression tests, one that the default gives a direct
+answer and one that the question is not inside a `<details>`.
+
+### 4.9 changed rather than slipped
+
+Task 4.9 said to add Sentry and analytics. The R-PRIV-03 trap test would fail if either
+were added, because both work by instrumenting exactly the network primitives the test
+traps, and that is the test doing its job. A page that says "nothing you typed was sent
+anywhere" cannot also ship a script whose purpose is to send things. ADR-0007 records the
+decision and, honestly, what it costs: no error telemetry and no funnel data.
+
+### What Sprint 4 delivered
+
+Two pages, both static, 166 tests overall. The rent check gives the worked example's answer
+in a real browser, with the audit trail, the citations and the statutory divergence at
+2,050.08 shown alongside. Sprint 2's measurement became the interface rule it should have
+been: the second figure appears prominently above a euro a month, quietly below it, and the
+wording changes depending on which direction the gap runs, because a statutory figure that
+is *lower* than the RTB's means something quite different to the reader.
 
 ---
 

@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const config: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@tenant/rules"],
+  transpilePackages: ["@tenant/rules", "@tenant/cpi"],
   async headers() {
     return [
       {

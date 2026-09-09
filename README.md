@@ -9,7 +9,7 @@ Standalone project. Nothing else needs to exist for it to run.
 
 ## Status
 
-The rules engine is built and tested. The site is still a placeholder.
+The rent check and the notice check are built and tested. The Vercel deployment is still failing for reasons that need its build log.
 See [`SPRINTS.md`](SPRINTS.md) for what happens next.
 
 | Sprint | What | State |
@@ -18,7 +18,7 @@ See [`SPRINTS.md`](SPRINTS.md) for what happens next.
 | S1 | The dated rules engine | **Complete.** 90 tests. One gap left open on purpose, below |
 | S2 | Ground truth against the official RTB calculator | **Complete.** 2,720 of 2,720, exact. And it disproved one of my own ADRs |
 | S3 | Notice validity | **Complete.** 37 tests. One part deliberately left unbuilt, below |
-| S4 | Web app v1, live | Not started |
+| S4 | Web app v1 | **Built and tested.** Not live yet, see the deployment note |
 | S5 | Explanation layer and dispute pack | Not started |
 | S6 | Listing check | Deferred, cut from v1 |
 | S7 | Ship | Not started |
@@ -192,6 +192,24 @@ them into a dispute they lose.
 **The deadline is computed and returned even when the notice is defective.** Section 22(3)
 gives the later of the effective date or 28 days from receipt, which in practice means the
 day the rent changes. Miss it and the amount cannot be disputed at all.
+
+## The site
+
+Two pages, both static, both doing all their work in the browser.
+
+The privacy line on the homepage says your rent and address are never sent anywhere. That
+is not a promise, it is a test: `fetch`, `XMLHttpRequest`, `WebSocket` and
+`navigator.sendBeacon` are all replaced with traps that fail the build if anything calls
+them during a calculation. It is also why there is no Sentry and no analytics on those
+pages, which is a real cost and is written down in
+[`ADR-0007`](docs/adr/ADR-0007-no-third-party-scripts-on-the-calculation-pages.md).
+
+Sprint 2's measurement turned into an interface rule here. Where the RTB's figure and a
+strict reading of the Act disagree, the second figure appears prominently above a euro a
+month and quietly below it, and the wording changes with the direction: a statutory figure
+that is *lower* than the RTB's means the increase may exceed the statutory cap even though
+the landlord used the official tool, which is a different and more delicate thing to tell
+someone.
 
 ## The architecture, in one paragraph
 

@@ -46,6 +46,7 @@ records below.
 | # | Document | What it found |
 |---|---|---|
 | [01](measurements/01-rtb-calculator-algorithm.md) | The RTB Rent Calculator algorithm | The official calculation is client-side and readable. It diverges from section 19(4) on the CPI reference month and on pro-rating by whole months. Closed three open questions and corrected the worked example |
+| [02](measurements/02-engine-agreement.md) | Agreement with the RTB calculator | 2,720 of 2,720 exact. And the two readings of section 19(4) differ by a median of 4.05 euro a month, up to 173.36, which disproved ADR-0006 |
 
 Numbering matches the convention used in `03-leafline`. Gaps are intentional and get
 filled in the sprint named.
@@ -60,6 +61,7 @@ filled in the sprint named.
 | [0004](adr/ADR-0004-user-initiated-fetch-not-crawl.md) | Fetch one page for one user, never crawl | robots.txt and terms, and RTB published data is the better baseline anyway |
 | [0005](adr/ADR-0005-typescript-and-a-pure-engine.md) | TypeScript, engine is pure | One implementation, runs in the browser, so rent and address never leave the device |
 | [0006](adr/ADR-0006-follow-the-calculator-show-the-statute.md) | Follow the RTB calculator, show the statutory figure too | The official tool diverges from section 19(4) in two places, and the landlord's notice will carry its number |
+| [0007](adr/ADR-0007-no-third-party-scripts-on-the-calculation-pages.md) | No third-party scripts on the calculation pages | Sentry and analytics would break the privacy claim, and the test that enforces it |
 
 ---
 

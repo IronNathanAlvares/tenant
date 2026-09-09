@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@tenant/cpi": "workspace:*",
     "@tenant/rules": "workspace:*",
     "next": "^15.1.0",
     "react": "^19.0.0",
